@@ -35,7 +35,7 @@ pipeline {
 
                 # Install my libraries
                 python -m pip install ./lib/pcb_netlist_graph-0.0.1-py3-none-any.whl
-                python -m pip isntall ./pcb_file_io-0.0.1-py3-none-any.whl
+                python -m pip install ./lib/pcb_file_io-0.0.1-py3-none-any.whl
 
                 # Install pytorch 
                 pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
