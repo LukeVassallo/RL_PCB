@@ -1,0 +1,292 @@
+import cv2 
+from datetime import datetime
+import numpy as np
+import torch
+
+def create_video(all_comp_grids, ratsnest, fileName=None, v_id=None, all_metrics=None, draw_debug=False, fps=30):
+    width = all_comp_grids[0][0].shape[0]
+    height = all_comp_grids[0][0].shape[1]
+    channel = 1
+    
+    if all_metrics is not None: 
+        metrics_width = int(1*width)
+        width = width + metrics_width
+
+    fps = fps  
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+    ts = datetime.now().strftime('%s_%f')
+        
+    if fileName == None:
+        fileName = f'{ts}_video.mp4'
+
+    video = cv2.VideoWriter(fileName, fourcc, float(
+        fps), (width, height), False)
+
+    if v_id != None:
+        for i in range(fps):
+            img = np.zeros(((width),height,1), np.uint8)
+            (text_width, text_height) = cv2.getTextSize(text=f'{v_id}',
+            fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale = 5,
+                thickness=2
+                )[0]
+
+            cv2.putText(img, 
+            f'{v_id}',
+            (int(0.5*width - text_width/2), int(0.5*height + text_height/2)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            6,
+            (128, 128, 0),
+            3
+            )
+            video.write(img)
+
+    ep_rewards = 0
+    for frame in range(len(all_comp_grids)):
+        
+        if all_metrics is not None: 
+            metrics_img = np.zeros((height, metrics_width, channel), dtype = np.uint8)
+            
+        img = all_comp_grids[frame][0] + \
+            2*all_comp_grids[frame][1]
+            
+        if draw_debug == True:
+            img = np.maximum(img,all_comp_grids[frame][2])
+
+        # if vector_to_group_midpoint == True:
+        #     if self.debug == False:
+        #         logging.error('vector to group midpoint overlay is not available because the environment is not configured in debug mode. Please re-initialise the environment \'debug\' argument set to True.')
+        #     #     mp, eucledian_dist, angle = compute_vector_to_group_midpoint(self.node, self.neighbors)
+        #     #     vex_grid = draw_vector_to_group_midpoint(self.node, mp, tuple([eucledian_dist, angle]), self.b, padding=self.padding)
+        #     #     img = np.maximum(img, vex_grid)
+        #     else:
+        #         img = np.maximum(img, self.vex_grids_group_mp[frame])
+
+        # if direction_of_movement_vector == True:
+        #     if self.debug == False:
+        #         logging.error('direction of movement vector overlay is not available because the environment is not configured in debug mode. Please re-initialise the environment \'debug\' argument set to True.')
+        #     else:
+        #         img = np.maximum(img, self.vex_grids_dom[frame])
+
+        if len(ratsnest) != 0:
+            img = np.maximum(img, ratsnest[frame])
+            
+
+
+        cv2.putText(img, f'{frame}', (int(0.075*width), int(0.1*height)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.85, (128, 128, 0), 2)  # 0.85 is the font scale
+        
+        
+        accumulated_reward = 0
+        if all_metrics is not None and frame > 0:
+            # ep_rewards += np.mean(all_rewards[frame-1])
+            height_mult = 0.04
+            total_cost = 0
+            total_reward = 0
+            total_nodes = 0
+            for item in all_metrics[frame-1]:
+                # For two components
+                # cv2.putText(metrics_img, f'id (name)        : {item["id"]} ({item["name"]})', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # height_mult += 0.05
+                # cv2.putText(metrics_img, f'rW (We)           : {np.round(item["W"],2)} ({np.round(item["We"],2)})', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # height_mult += 0.05
+                # cv2.putText(metrics_img, f'rHPWL (HPWLe)   : {np.round(item["HPWL"],2)} ({np.round(item["HPWLe"],2)})', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # height_mult += 0.05
+                # cv2.putText(metrics_img, f'ol                : {np.round(item["ol"],2)}', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # height_mult += 0.05      
+                # cv2.putText(metrics_img, f'cost (reward)       : {np.round(item["weighted_cost"],2)} ({np.round(item["reward"],2)})', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # total_cost += item["weighted_cost"]
+                # total_reward += item["reward"]
+                # total_nodes += 1
+                # height_mult += 0.1 
+                
+                # For five components
+                cv2.putText(metrics_img, f'id; cost    : {item["id"]} ({item["name"]}); {np.round(item["weighted_cost"],2)} ({np.round(item["reward"],2)})', (int(0.02*width), int(height_mult*height)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                height_mult += 0.04
+                cv2.putText(metrics_img, f'rW; rHPWL   : {np.round(item["W"],2)} ({np.round(item["We"],2)}); {np.round(item["HPWL"],2)} ({np.round(item["HPWLe"],2)})', (int(0.02*width), int(height_mult*height)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                height_mult += 0.04
+                cv2.putText(metrics_img, f'ol           : {np.round(item["ol"],2)}', (int(0.02*width), int(height_mult*height)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                # height_mult += 0.05      
+                # cv2.putText(metrics_img, f'cost (reward)       : {np.round(item["weighted_cost"],2)} ({np.round(item["reward"],2)})', (int(0.02*width), int(height_mult*height)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+                total_cost += item["weighted_cost"]
+                total_reward += item["reward"]
+                total_nodes += 1
+                height_mult += 0.075
+                
+            cv2.putText(metrics_img, f'Average cost        : {np.round(total_cost/total_nodes,2)}', (int(0.02*width), int(0.85*height)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+            cv2.putText(metrics_img, f'Average reward      : {np.round(total_reward/total_nodes,2)}', (int(0.02*width), int(0.9*height)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+            accumulated_reward += total_reward/total_nodes
+            cv2.putText(metrics_img, f'Accumulated reward      : {np.round(accumulated_reward,2)}', (int(0.02*width), int(0.95*height)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (128, 128, 0), 1)  # 0.85 is the font scale
+
+
+        if all_metrics is not None:        
+            metrics_img = np.reshape(metrics_img, (metrics_img.shape[0],metrics_img.shape[1]))
+        # cv2.putText(img, f'{np.round(self.all_ol[frame]),2)}', (int(0.05*width), int(
+        #     0.95*hieght)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2)  # 0.85 is the font scale
+        # cv2.putText(img, f'{np.round(np.sum(self.all_w[frame]),2)}', (int(
+        #     0.30*width), int(0.95*hieght)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2)
+        # cv2.putText(img, f'{np.round(np.sum(self.all_hpwl[frame]),2)}', (int(
+        #     0.55*width), int(0.95*hieght)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2)
+        
+        # for i in le
+        # cv2.putText(img, f'{np.round(np.sum(weighted_cost[frame]),2)}', (int(
+        #     0.55*width), int(0.95*hieght)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2)        
+        
+        if all_metrics is not None: 
+            video.write(cv2.hconcat([img,metrics_img]))
+        else:
+            video.write(img)
+
+    video.release()            
+
+def video_frames(all_comp_grids, ratsnest, v_id=None):
+    width = all_comp_grids[0][0].shape[0]
+    height = all_comp_grids[0][0].shape[1]
+    channels = 1
+
+    fps = 30
+    v_id_duration_in_frames = int(fps/2)
+
+    total_frames = len(all_comp_grids) + v_id_duration_in_frames
+
+    frame_buffer = np.zeros((total_frames, height, width, channels), np.uint8)
+
+    if v_id != None:
+        for i in range(v_id_duration_in_frames):
+            (text_width, text_height) = cv2.getTextSize(text=f'{v_id}',
+            fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale = 5,
+                thickness=2
+                )[0]
+
+            cv2.putText(frame_buffer[i], 
+            f'{v_id}',
+            (int(0.5*width - text_width/2), int(0.5*height + text_height/2)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            6,
+            (128, 128, 0),
+            3
+            )
+
+    for frame in range(len(all_comp_grids)):
+        #img = np.random.randint(0,255, (hieght, width, channel), dtype = np.uint8)
+        idx = frame+v_id_duration_in_frames
+        frame_buffer[idx] = np.resize(np.maximum(all_comp_grids[frame][0] + 2*all_comp_grids[frame][1], ratsnest[frame]), (width,height,channels))
+
+        cv2.putText(frame_buffer[idx], f'{frame}', (int(0.075*width), int(0.1*height)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.85, (128, 128, 0), 2)  # 0.85 is the font scale   
+
+    return frame_buffer
+
+def write_frame_buffer(frame_buffer, fileName=None):
+
+    width = frame_buffer[0].shape[-2]
+    height = frame_buffer[0].shape[-3]
+    fps = 30
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+    ts = datetime.now().strftime('%s_%f')
+        
+    if fileName == None:
+        fileName = f'{ts}_video.mp4'
+
+    video = cv2.VideoWriter(fileName, fourcc, float(
+        fps), (width, height), False)
+
+    for frame in frame_buffer:
+        video.write(frame)
+
+    video.release()        
+    
+def create_image(all_comp_grids, ratsnest, fileName=None, draw_debug=False):
+
+    img = all_comp_grids[-1][0] + 2*all_comp_grids[-1][1]
+        
+    if draw_debug == True:
+        img = np.maximum(img,all_comp_grids[-1][2])
+
+    if len(ratsnest) != 0:
+        img = np.maximum(img, ratsnest[-1])
+        
+    cv2.imwrite(fileName, img)        
+        
+def get_video_tensor(all_comp_grids, ratsnest):
+     width = all_comp_grids[0][0].shape[0]
+     height = all_comp_grids[0][0].shape[1]
+     channels = 1
+
+     fps = 30   
+
+     frame_buf = []
+     frames = len(all_comp_grids)
+     
+     # if padding is not None:
+     #     coords_and_path_img = np.zeros((width,height), np.uint8)
+     # else:
+     #     coords_and_path_img = np.zeros((width,height,1), np.uint8)   # untested
+     
+     for frame_number in range(frames):
+         #img = np.random.randint(0,255, (hieght, width, channel), dtype = np.uint8)
+         frame = all_comp_grids[frame_number][0] + \
+             2*all_comp_grids[frame_number][1]
+
+
+         frame = np.maximum(frame, ratsnest[frame_number])
+
+         # goal_pt_img = draw_current_node_center( c = ( self.optimal_location[0],
+         #                                 self.optimal_location[1] 
+         #                                 ),
+         #     b = self.b,
+         #     radius=0.3,
+         #     fill=False,
+         #     padding = self.padding )
+             
+         # frame = np.maximum(frame, goal_pt_img)
+         
+
+             
+         # if draw_path == True and frame_number != 0:
+         #     line = draw_line_between_points(self.q_coords[frame_number], 
+         #                                                    self.q_coords[frame_number-1],
+         #                                                    self.b,
+         #                                                    thickness=1,
+         #                                                    padding=self.padding)
+             
+         #     coords_and_path_img = np.maximum(coords_and_path_img, line)
+         #     frame = np.maximum(frame, coords_and_path_img)
+             
+         cv2.putText(frame, f'{frame_number}', (int(0.075*width), int(0.1*height)),
+                     cv2.FONT_HERSHEY_SIMPLEX, 0.85, (128, 128, 0), 2)  # 0.85 is the font scale
+         # cv2.putText(frame, f'{np.round(np.sum(self.reward[:frame_number]),3)}', (int(0.05*width), int(
+         #     0.95*height)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2)  # 0.85 is the font scale
+         # cv2.putText(frame, f'{np.round(np.sum(self.all_ol[frame_number])/8,3)}', (int(
+         #     0.50*width), int(0.95*height)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 128, 0), 2) 
+
+         np.reshape(frame, (channels, height, width))
+
+         frame_buf.append(frame)
+
+     video_tensor = torch.tensor(np.array(frame_buf))
+     # print(video_tensor.shape)
+     video_tensor = video_tensor.view([1,frames,channels,height,width])
+     return video_tensor        
+ 
+
+
+
+    
