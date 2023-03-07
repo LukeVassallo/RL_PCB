@@ -6,10 +6,7 @@ import torch.nn.functional as F
 
 import utils
 import tracker
-import datetime
 import time
-
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3)
 # Paper: https://arxiv.org/abs/1802.09477
@@ -96,15 +93,14 @@ class Critic(nn.Module):
 class TD3(object):
 	def __init__(
 		self,
-# 		state_dim,
-# 		action_dim,
 		max_action,
         hyperparameters,
         train_env,
-        device:str = "cuda",
+        device:str = "cpu",
         early_stopping:int = 100_000,
         state_dim:int = 23,             # used when a training environment is not supplied
-        action_dim:int = 3              # used when a training environment is not supplied
+        action_dim:int = 3,             # used when a training environment is not supplied
+        verbose: int = 0
 	):
 		self.device=device
 		if device == "cuda":
@@ -112,6 +108,8 @@ class TD3(object):
 		else:
 			self.device = torch.device("cpu")
 
+		if verbose == 1:
+			print(f"Model TD3 is configured to device {self.device}")
                     
 		self.train_env = train_env
         
@@ -123,7 +121,6 @@ class TD3(object):
 		self.actor_target = copy.deepcopy(self.actor)
 		self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=hyperparameters["learning_rate"])
 
-		#self.critic = Critic(state_dim, action_dim).to(self.device)
 		self.critic = Critic(state_dim, action_dim, hyperparameters["net_arch"]["qf"], hyperparameters["activation_fn"]).to(self.device)
 		self.critic_target = copy.deepcopy(self.critic)
 		self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=hyperparameters["learning_rate"])
@@ -150,7 +147,6 @@ class TD3(object):
 		state = torch.FloatTensor(state.reshape(1, -1)).to(self.device)
 		return self.actor(state).cpu().data.numpy().flatten()
 
-# 	def train(self, replay_buffer, batch_size=256):	
 	def train(self, replay_buffer):
 		self.total_it += 1
 
@@ -249,7 +245,6 @@ class TD3(object):
 			print('Model cannot learn because training envrionment is missing. Please reload model and supply a training envrionment.')
 			return
             
-		#next_update_at = self.buffer_size
 		next_update_at = self.buffer_size*2 
         
 		episode_reward = 0
@@ -274,13 +269,11 @@ class TD3(object):
 			else:
 				obs_vec = self.train_env.step(model=self.actor, random=False)
 
-
 			all_rewards = []
 			for indiv_obs in obs_vec:
 				if indiv_obs[4] == True:
 					self.done = True
 				all_rewards.append(indiv_obs[2])
-            			#transition = (state, action, next_state, reward, 1. - done)
 				transition = (indiv_obs[0], indiv_obs[3], indiv_obs[1], indiv_obs[2], 1. -indiv_obs[4])
 				self.replay_buffer.add(*transition)
             
@@ -290,8 +283,6 @@ class TD3(object):
 				critic_loss, actor_loss = self.train(self.replay_buffer)
             
 			if self.done:
-                #training_log.write(f'{episode_num+1},{t+1},{episode_timesteps},{np.round(episode_reward,6)}\r\n')
-# 				print(f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
 				episode_finish_time = time.clock_gettime(time.CLOCK_REALTIME)  
 				if t < start_timesteps:
 					self.trackr.append(actor_loss=0,
@@ -306,55 +297,6 @@ class TD3(object):
                            episode_length = episode_timesteps,
                            episode_fps = episode_timesteps / (episode_finish_time - episode_start_time))
                     
-                       # episode_length=info["episode_length"],
-                       # episode_fps=info["episode_length"] / (info["episode_finish_time"] - info["episode_start_time"]))
-# move to callback
-# 				if evaluate:
-# 					pcb_filename = f'{int((current_evaluation_interval-evaluate_every)/1_000)}k.pcb'
-# 					self.train_env.write_pcb_file(path=pcb_dir, filename=pcb_filename)
-# 					path = os.path.join(video_training_dir, f'{int((current_evaluation_interval-evaluate_every)/1_000)}k')
-#                     # Create directory if it doesn't exsit.
-# 					if os.path.isdir(path) == False:
-# 						os.mkdir(path)
-# 					evaluate_save_video(policy, args.seed, path, args, pcb_file=os.path.join(pcb_dir, pcb_filename), model_path=models_dir, writer=None, run_name=start_time, t=t, target_params=env.get_target_params())                                     
-                        
-# 					path = os.path.join(video_evaluation_dir, f'{int((current_evaluation_interval-evaluate_every)/1_000)}k')
-# 					if os.path.isdir(path) == False:
-# 						os.mkdir(path)
-# 					evaluate_save_video(policy, args.seed, path, args, pcb_file=evaluation_pcb_file, model_path=None, writer=None, run_name=start_time, t=(current_evaluation_interval-evaluate_every)/1_000, target_params=env.get_target_params(), write_pcb_file=True, output_pcb_file_path=path)                                     
-
-# 					evaluate = False
-                   
-                # MOVE TO CALLBACK
-                # avg = tracker.get_mean()
-                # current = tracker.get_most_recent()
-                # writer.add_scalar(tag="rollout_mean/mean_actor_loss", scalar_value=avg[0], global_step=t)
-                # writer.add_scalar(tag="rollout/actor_loss", scalar_value=current[0], global_step=t)
-                # writer.add_scalar(tag="rollout_mean/mean_critic_loss", scalar_value=avg[1], global_step=t)
-                # writer.add_scalar(tag="rollout/critic_loss", scalar_value=current[1], global_step=t)
-                # writer.add_scalar(tag="rollout_mean/mean_episode_reward", scalar_value=avg[2], global_step=t)
-                # writer.add_scalar(tag="rollout/episode_reward", scalar_value=current[2], global_step=t)
-
-                # writer.add_scalar(tag="rollout_mean/mean_episode_length", scalar_value=avg[3], global_step=t)
-                # writer.add_scalar(tag="rollout/episode_length", scalar_value=current[3], global_step=t)
-                # writer.add_scalar(tag="rollout_mean/mean_fps", scalar_value=avg[4], global_step=t) 
-                # writer.add_scalar(tag="rollout/fps", scalar_value=current[4], global_step=t)                  
-                # writer.flush() 
-                
-            #MOVE TO CALLBACK
-            # if evaluate_every is not None:
-            #     if t > current_evaluation_interval-1:
-                    
-            #         # env.write_pcb_file(path=pcb_dir, filename=f'{int(current_evaluation_interval/1_000)}k.pcb')
-            #         # path = os.path.join(video_training_dir, f'{int(current_evaluation_interval/1_000)}k')
-                
-            #         # # Create directory if it doesn't exsit.
-            #         # if os.path.isdir(path) == False:
-            #         #     os.mkdir(path)
-
-            #         # evaluate_save_video(policy, args.seed, path, args, pcb_file=os.path.join(pcb_dir, f'{int(current_evaluation_interval/1_000)}k.pcb'), model_path=models_dir, writer=None, run_name=start_time, t=t, target_params=env.get_target_params())
-            #         current_evaluation_interval += evaluate_every
-            #         evaluate=True
 			callback.on_step()
 			if self.done:
 				self.train_env.reset()
@@ -369,13 +311,11 @@ class TD3(object):
 			if self.exit == True:
 				print(f'Early stopping mechanism triggered at timestep={self.num_timesteps} after {self.early_stopping} steps without improvement ... Learning terminated.')
 				break
-                
    
 			if incremental_replay_buffer is not None:
 				if t >= next_update_at:
 					if incremental_replay_buffer == "double":
 						self.buffer_size *= 2
-						#next_update_at += self.buffer_size# * 2
 						next_update_at += self.buffer_size * 2
 					elif incremental_replay_buffer == "triple":
 						self.buffer_size *= 3
@@ -385,14 +325,9 @@ class TD3(object):
 						next_update_at += self.buffer_size# * 3                        
                     
 					old_replay_buffer = self.replay_buffer
-                    #replay_buffer = utils.ReplayMemory(replay_buffer_size, torch.device('cuda'))
 					self.replay_buffer = utils.ReplayMemory(self.buffer_size, device=self.device)
 					self.replay_buffer.add_content_of(old_replay_buffer)
                     
 					print(f'Updated replay buffer at timestep {t}; replay_buffer_size={self.buffer_size}, len={self.replay_buffer.__len__()} next_update_at={next_update_at}')
 		
-		callback.on_training_end()         
-# 		training_log.write("data end\r\n")
-# 		training_log.close()   
-# 		env.write_pcb_file()
-		
+		callback.on_training_end()

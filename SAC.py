@@ -1,18 +1,10 @@
-import os
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from utils import soft_update, hard_update, ReplayMemory
-# from model import GaussianPolicy, QNetwork, DeterministicPolicy
-
-
-import datetime 
-# from replay_memory import ReplayMemory
 import time
-# from env_utils import convert_dict_obs_to_list
 import numpy as np
 
-#import torch.nn as nn
 from torch.distributions import Normal
 import tracker
 import gym 
@@ -27,7 +19,6 @@ def weights_init_(m):
         torch.nn.init.constant_(m.bias, 0)
 
 class QNetwork(torch.nn.Module):
-    # def __init__(self, num_inputs, num_actions, hidden_dim=256):
     def __init__(self, num_inputs, num_actions, qf : list = [400, 300], activation_fn: str = "relu"):
 
         super(QNetwork, self).__init__()
@@ -183,36 +174,36 @@ class GaussianPolicy(torch.nn.Module):
 
 
 class SAC(object):
-    #def __init__(self, num_inputs, action_space, device="cpu", args=None):
     def __init__(
             self,
             max_action,
             hyperparameters,
             train_env,
-            device:str = "cuda",
+            device:str = "cpu",
             early_stopping:int = 100_000,
-            state_dim:int = 23,             # used when a training environment is not supplied
-            action_dim:int = 3              # used when a training environment is not supplied
+            state_dim:int = 23,                     # used when a training environment is not supplied
+            action_dim:int = 3,                     # used when a training environment is not supplied
+            verbose:int =0
             ):
             
-        self.gamma = hyperparameters["gamma"] #0.99 #args.gamma
-        self.tau = hyperparameters["tau"] #0.005 #args.tau
-        self.alpha = 0.2 #args.alpha
-        self.lr = hyperparameters["learning_rate"] #3e-4
+        self.gamma = hyperparameters["gamma"]       # 0.99
+        self.tau = hyperparameters["tau"]           # 0.005 
+        self.alpha = 0.2                            # args.alpha
+        self.lr = hyperparameters["learning_rate"]  # 3e-4
         self.batch_size = hyperparameters["batch_size"]
         self.buffer_size = hyperparameters["buffer_size"]
-        # FIX !!!!!
-        self.gradient_steps = 1
-        #self.gradient_steps = hyperparameters["gradient_steps"]
-        self.policy_type = "Gaussian" #args.policy
-        self.target_update_interval = 1 #args.target_update_interval
-        self.automatic_entropy_tuning = True #args.automatic_entropy_tuning
+        self.gradient_steps = 1                     # self.gradient_steps = hyperparameters["gradient_steps"]         
+        self.policy_type = "Gaussian"               # args.policy
+        self.target_update_interval = 1             # args.target_update_interval
+        self.automatic_entropy_tuning = True        # args.automatic_entropy_tuning
 
-        #self.device = torch.device("cuda" if args.cuda else "cpu")
         if device == "cuda":
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:            
             self.device = torch.device("cpu")
+            
+        if verbose > 1:
+            print(f"Model SAC is configured to learn with device {self.device}")            
         
         self.train_env = train_env
                 
@@ -223,13 +214,9 @@ class SAC(object):
             action_shape = (3,)
             action_space = gym.spaces.Box(low=np.array([0,0,0], dtype=np.float32), high=np.array([1,2*np.pi,1], dtype=np.float32))
 
-        #self.critic = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
-        # self.critic = QNetwork(num_inputs, action_space.shape[0]).to(device=self.device)
         self.critic = QNetwork(state_dim, action_dim, hyperparameters["net_arch"]["qf"], hyperparameters["activation_fn"]).to(device=self.device)
         self.critic_optim = Adam(self.critic.parameters(), lr=self.lr)#args.lr)
 
-        #self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
-        # self.critic_target = QNetwork(num_inputs, action_space.shape[0]).to(self.device)
         self.critic_target = QNetwork(state_dim, action_dim, hyperparameters["net_arch"]["qf"], hyperparameters["activation_fn"]).to(self.device)
 
         hard_update(self.critic_target, self.critic)
@@ -245,8 +232,6 @@ class SAC(object):
             self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
             self.alpha_optim = Adam([self.log_alpha], lr=self.lr)#args.lr)
 
-        # self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
-        # self.policy = GaussianPolicy(num_inputs, action_space.shape[0], action_space=action_space).to(self.device)
         if self.train_env is not None:
             self.policy = GaussianPolicy(state_dim, action_dim, hyperparameters["net_arch"]["pi"], hyperparameters["activation_fn"], action_space=train_env.agents[0].action_space, device=device).to(self.device)
         else:
@@ -264,7 +249,6 @@ class SAC(object):
             #self.policy_optim = Adam(self.policy.parameters(), lr=self.lr)#args.lr)
             
         # Memory
-        #self.memory = ReplayMemory(hyperparameters["buffer_size"], 3142)
         self.replay_buffer = ReplayMemory(capacity=hyperparameters["buffer_size"], device=self.device) 
         self.trackr = tracker.tracker(avg_size=100,rl_policy_type="SAC")   
         
@@ -282,14 +266,6 @@ class SAC(object):
 
     def train(self, memory, batch_size, updates):
         # Sample a batch from memory
-        # state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(batch_size=batch_size)
-
-        # state_batch = torch.FloatTensor(state_batch).to(self.device)
-        # next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
-        # action_batch = torch.FloatTensor(action_batch).to(self.device)
-        # reward_batch = torch.FloatTensor(reward_batch).to(self.device).unsqueeze(1)
-        # mask_batch = torch.FloatTensor(mask_batch).to(self.device).unsqueeze(1)
-
         state_batch, action_batch, next_state_batch, reward_batch, mask_batch = memory.sample(batch_size=batch_size)
 
 
@@ -353,7 +329,6 @@ class SAC(object):
             if self.done:
                 self.train_env.reset()
                 self.done = False
-                #env.tracker.create_video()
                 self.train_env.tracker.reset()
     
         self.train_env.reset()
@@ -380,7 +355,6 @@ class SAC(object):
         episode_start_time = start_time
 
         # Training Loop
-        total_numsteps = 0
         updates = 0
         
         all_actor_losses = []
@@ -403,7 +377,6 @@ class SAC(object):
                 if indiv_obs[4] == True:
                     self.done = True
                 all_rewards.append(indiv_obs[2])
-         			#transition = (state, action, next_state, reward, 1. - done)
                 transition = (indiv_obs[0], indiv_obs[3], indiv_obs[1], indiv_obs[2], 1. -indiv_obs[4])
                 self.replay_buffer.add(*transition)
          
@@ -423,8 +396,6 @@ class SAC(object):
                         all_entropy_losses.append(ent_loss)
             
             if self.done:
-                #training_log.write(f'{episode_num+1},{t+1},{episode_timesteps},{np.round(episode_reward,6)}\r\n')
-# 				print(f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
                 episode_finish_time = time.clock_gettime(time.CLOCK_REALTIME)  
                 if t < start_timesteps or len(self.replay_buffer) <= self.batch_size:
                     self.trackr.append(actor_loss=0,

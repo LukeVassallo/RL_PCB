@@ -5,36 +5,36 @@ Created on Sat Sep 10 18:06:36 2022
 
 @author: luke
 """
-from torch.utils.tensorboard import SummaryWriter
 
 import os
+import copy
 import numpy as np
 from datetime import datetime
 
+from torch.utils.tensorboard import SummaryWriter
 from core.environment.environment import environment
 
 import pcb.pcb as pcb
 import graph.graph as graph     # Necessary for graph related methods
-from hyperparameters import load_hyperparameters_from_file
 
-import copy
 class log_and_eval_callback():
     def __init__(
             self,
             log_dir: str,
             settings: dict,
             hyperparameters: dict,
+            model,
             verbose: int = 1,
             num_evaluations: int = 10,
             eval_freq: int = 10_000,
             training_log: str = None,
-            
         ):
+        
         super().__init__()
         self.log_dir = log_dir
-        self.save_path = self.log_dir  # root logging directory
-        self.model_path = os.path.join(self.save_path, "models")    # subdirectory containing saved models
-        self.video_path = os.path.join(self.save_path, "video_dir") # subdirectory containing evaluations
+        self.save_path = self.log_dir                                           # root logging directory
+        self.model_path = os.path.join(self.save_path, "models")                # subdirectory containing saved models
+        self.video_path = os.path.join(self.save_path, "video_dir")             # subdirectory containing evaluations
         self.video_train_path = os.path.join(self.video_path, "training_set")   # subdirectory containing evaluations based of training pcb file
         self.video_eval_path = os.path.join(self.video_path, "evaluation_set")  # subdirectory containing evaluations based off evaluation pcb file
         self.optimals = os.path.join(self.save_path, "wirelength.optimals")     # optimals file for saving best We.
@@ -42,12 +42,12 @@ class log_and_eval_callback():
         self.verbose = verbose
         self.num_evaluations = num_evaluations
         self.eval_freq = eval_freq
-        if training_log is not None:    # logfile to save episode progress
+        if training_log is not None:            # logfile to save episode progress
             self.training_log = os.path.join(self.save_path,training_log)
         else:
             self.training_log = training_log    # None
             
-        self.num_episodes = 0           # Store the number of lifetime episodes.
+        self.num_episodes = 0                   # Store the number of lifetime episodes.
         self.last_rollout_finish = None
         
         self.reward = 0
@@ -87,6 +87,8 @@ class log_and_eval_callback():
         self.hyperparameters = hyperparameters
         self.rl_model_type = settings["rl_model_type"]
         self.shuffle_evaluation_idxs = settings["shuffle_evaluation_idxs"]
+        self.model = model
+        
     def on_step(self):
         if self.model.done:
             episode_length = self.model.trackr.episode_length[-1]
@@ -163,8 +165,9 @@ class log_and_eval_callback():
         self.initial_We = self.model.train_env.get_all_target_params()
         
         # log optimals
+        if self.verbose > 1:
+            print(f'Saving initial wirelength values, {self.training_env.get_attr("We")}')
         f = open(self.optimals, "w")
-        #print(f'Saving initial wirelength, {self.training_env.get_attr("We")}')
         f.write(f'intial={self.initial_We}\r\n')
         f.close()
         
@@ -178,6 +181,8 @@ class log_and_eval_callback():
         self.final_We = self.model.train_env.get_all_target_params()
         
         # log optimals
+        if self.verbose > 1:
+            print(f'Saving final wirelength values, {self.training_env.get_attr("We")}')
         f = open(self.optimals, "a")
         f.write(f'final={self.final_We}\r\n')
         f.close()
@@ -187,17 +192,34 @@ class log_and_eval_callback():
         
         self.log_settings(self.settings, initial_We=self.initial_We, final_We=self.final_We, hyperparameters=self.hyperparameters, model=self.model, global_step=0)
         
-    def evaluate(self, model: str,
-                 tag,
-                            training_dataset: bool = True,
-                            quick_eval: bool=True,
-                            periodic: bool= True, 
-                            long: bool= False,
-                            verbose: int = 0):
-        # args, pcb_file, 
-        #                         model_path=None, eval_episodes=10, writer=None, 
-        #                         run_name=0, t=0, target_params=None, 
-        # policy, seed, video_path, write_pcb_file=False, output_pcb_file_path=None, save_best_layouts=False, 
+    def evaluate( self, 
+                  model: str,
+                  tag: str,
+                  training_dataset: bool = True,
+                  quick_eval: bool=True,
+                  periodic: bool= True, 
+                  long: bool= False,
+                  verbose: int = 0 ):
+        """
+        :param model: Select model to use for evaluation. There are two options for selecting a model to use for evaluation: best and best_mean. The best model is the one that achieved the highest return during training, while the best_mean model is the one that had the highest average return over 100 episodes.
+        :type model: str
+        :param tag: Tag in tensorboard
+        :type tag: TYPE
+        :param training_dataset: Select dataset to use for evaulation. When True, the training dataset is used, otherwise the evaluation dataset, defaults to True
+        :type training_dataset: bool, optional
+        :param quick_eval: When True saves the best layouts and creates an .mp4 video file of the episode, defaults to True
+        :type quick_eval: bool, optional
+        :param periodic: Indicates whether the evaluation is periodic or final. Used to determine the logging directory and tensorboard tag for appropriately classifying the evaluations, defaults to True
+        :type periodic: bool, optional
+        :param long: Determines the evaluation duration. When True, the episode length is multiplied by multiplied by three, defaults to False
+        :type long: bool, optional
+        :param verbose: function verbosity, defaults to 0
+        :type verbose: int, optional
+        :return: List containing the average reward per episode and average steps per episode
+        :rtype: TYPE
+
+        """
+
         global best_reward
         
         if model is not None:
@@ -225,7 +247,6 @@ class log_and_eval_callback():
                 video_tag = f'periodic_training_evaluations/{self.model.num_timesteps/1000}k'
             else:
                 video_tag = 'final_training_evaluation'
-
         else:
             params.pcb_file = params.evaluation_pcb
             if periodic == True:
@@ -280,8 +301,6 @@ class log_and_eval_callback():
                 step_reward=0
                 
                 if quick_eval == False: # save best layouts, log video
-                #if save_best_layouts == True:
-                    # measure wirelength and overlap.
                     t = int(self.model.num_timesteps/1000)
                     hpwl = eval_env.calc_hpwl()
                     
@@ -362,11 +381,45 @@ class log_and_eval_callback():
             
         return [total_reward / self.num_evaluations, total_steps / self.num_evaluations]
     
-    def log_video(self, vids, tag="evaluation_run", global_step=0):
+    def log_video(self, vids, tag:str="evaluation_run", global_step:int=0):
+        """
+        Logs a 2D tensor of video frames to tensorboard
+        :param vids: 2D video tensor
+        :type vids: torch.tensor
+        :param tag: Tensorboard tag, defaults to "evaluation_run"
+        :type tag: str, optional
+        :param global_step: Tensorboard global step number, defaults to 0
+        :type global_step: int, optional
+        :return: Nothing
+        :rtype: TYPE
+
+        """
         self.writer.add_video(tag=tag, vid_tensor=vids, global_step=global_step, fps=30)
         self.writer.flush()    
 
-    def log_settings(self, settings=None, tag="settings", initial_We=None, final_We=None, cmdline_args=None, hyperparameters=None, model=None,global_step=0):       
+    def log_settings(self, settings=None, tag:str="settings", initial_We=None, final_We=None, cmdline_args=None, hyperparameters=None, model=None, global_step:int=0): 
+        """
+        Log experiment settings to tensorboard
+        :param settings: DESCRIPTION, defaults to None
+        :type settings: TYPE, optional
+        :param tag: Tensorboard tag, defaults to "settings"
+        :type tag: str, optional
+        :param initial_We: DESCRIPTION, defaults to None
+        :type initial_We: TYPE, optional
+        :param final_We: DESCRIPTION, defaults to None
+        :type final_We: TYPE, optional
+        :param cmdline_args: DESCRIPTION, defaults to None
+        :type cmdline_args: TYPE, optional
+        :param hyperparameters: DESCRIPTION, defaults to None
+        :type hyperparameters: TYPE, optional
+        :param model: DESCRIPTION, defaults to None
+        :type model: TYPE, optional
+        :param global_step: DESCRIPTION, defaults to 0
+        :type global_step: int, optional
+        :return: DESCRIPTION
+        :rtype: TYPE
+
+        """
         s = str("")
     
         if cmdline_args is not None:
@@ -424,7 +477,6 @@ class log_and_eval_callback():
         s += "<strong>Dependency Information</strong><br>"
         s += pcb.build_info_as_string().replace('\n','<br>')[4:-4]
         s += graph.build_info_as_string().replace('\n','<br>')    
-        
         
         self.writer.add_text(tag=tag, text_string=s, global_step=global_step)
         self.writer.flush() 

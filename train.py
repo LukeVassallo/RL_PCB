@@ -1,26 +1,22 @@
-# from core.agent.agent import agent
 from core.environment.environment import environment
 from core.environment.parameters import parameters
 
 import numpy as np
 import torch
-import sys, os
-
+import os
 import datetime
-import time
+import random
 
 from run_config import cmdLine_args, write_desc_log
 from hyperparameters import load_hyperparameters_from_file
 from model_setup import setup_model
-import multiprocessing
+from callbacks import log_and_eval_callback
 
-import random
+best_reward = -np.inf          # New best model, you could save the agent here
 
 def setup_seed(seed):
-    
     random.seed(seed)
     np.random.seed(seed)       # Seed numpy RNG  
-    torch.use_deterministic_algorithms(True)
     torch.manual_seed(seed)    # seed the RNG for all devices (both CPU and CUDA)
 
     if torch.cuda.is_available():
@@ -28,22 +24,7 @@ def setup_seed(seed):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-# New best model, you could save the agent here
-best_reward = -np.inf
-
-from callbacks import log_and_eval_callback
-
-MAJOR_VERSION=0
-MINOR_VERSION=0
-PATCH_VERSION=1
-
-def program_info(device):
-    print("")
-    print("multi agent test file.")
-    print(f'Program version        : {MAJOR_VERSION}.{MINOR_VERSION}.{PATCH_VERSION}')
-    print(f'Last modification time : {time.ctime(os.path.getmtime("./01_multi_agent.py"))}')
-    print("")
-    
+def program_info(device):    
     if device == "cuda":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
@@ -186,7 +167,7 @@ def evaluate_save_video(policy, seed, video_path, args, pcb_file, model_path=Non
         evaluation_log.write(f'eval_env episode {i} performed {episode_steps} in environment.\r\n')
         print(f'eval_env episode {i} performed {episode_steps} in environment.')
         eval_env.tracker.create_video(fileName=os.path.join(video_path, f'{i}.mp4'))
-        #eval_env.tracker.create_plot(fileName=os.path.join(video_path, f'{i}.png'))
+        eval_env.tracker.create_plot(fileName=os.path.join(video_path, f'{i}.png'))
         eval_env.tracker.log_run_to_file(path=video_path, filename=f'{i}.log', kicad_pcb=eval_env.g.get_kicad_pcb_file())
         eval_env.tracker.reset()
     
@@ -221,44 +202,42 @@ def training_run(settings):
         
     hp = load_hyperparameters_from_file(settings["hyperparameters"])
 
-    env_params=parameters({ 
-        "pcb_file": settings["training_pcb"],
-        "training_pcb": settings["training_pcb"],
-        "evaluation_pcb": settings["evaluation_pcb"],
-        # "pcb_file": "/home/luke/Desktop/semi_autonomous/boards/05_2_multi_agent/bistable_oscillator_with_555_timer_and_ldo_2lyr_setup_00.pcb",
-        "net": "/home/luke/Desktop/semi_autonomous/py/pcb_component_w_vec_distance_v2/reward_v5/05_log/1656941074/1656941074_best_model.td3",
-        "use_dataAugmenter": True,
-        "augment_position": True,
-        "augment_orientation": True,
-        "agent_max_action": 1,
-        "agent_expl_noise": hp["expl_noise"],
-        "debug": False,
-        "max_steps": 200,
-        "w": settings["w"],
-        "o": settings["o"],
-        "hpwl": settings["hpwl"],
-        "seed": settings['seed'][settings["run"]],
-        "ignore_power": True,
-        "log_dir": settings['log_dir'],
-        "idx": None,
-        "shuffle_idxs": settings['shuffle_training_idxs'],
-        })
+    env_params=parameters({"pcb_file": settings["training_pcb"],
+                           "training_pcb": settings["training_pcb"],
+                           "evaluation_pcb": settings["evaluation_pcb"],
+                           "net": "/home/luke/Desktop/semi_autonomous/py/pcb_component_w_vec_distance_v2/reward_v5/05_log/1656941074/1656941074_best_model.td3",
+                           "use_dataAugmenter": True,
+                           "augment_position": True,
+                           "augment_orientation": True,
+                           "agent_max_action": 1,
+                           "agent_expl_noise": hp["expl_noise"],
+                           "debug": False,
+                           "max_steps": 200,
+                           "w": settings["w"],
+                           "o": settings["o"],
+                           "hpwl": settings["hpwl"],
+                           "seed": settings['seed'][settings["run"]],
+                           "ignore_power": True,
+                           "log_dir": settings['log_dir'],
+                           "idx": None,
+                           "shuffle_idxs": settings['shuffle_training_idxs'],
+                           })
+    
     env = environment(env_params)
     env.reset()
     
-    model = setup_model(model_type=settings["policy"], train_env=env, hyperparameters=hp, device=settings["device"], early_stopping=settings["early_stopping"])          
+    model = setup_model(model_type=settings["policy"], train_env=env, hyperparameters=hp, device=settings["device"], early_stopping=settings["early_stopping"], verbose=settings["verbose"])          
 
-    callback = log_and_eval_callback(
-        log_dir=settings['log_dir'],
-        settings=settings,
-        hyperparameters=hp,
-        eval_freq=settings['evaluate_every'],
-        verbose=settings['verbose'],
-        training_log="training.log",
-        num_evaluations=16,  # set back to 16 after sorting the seed issue
-    )
+    callback = log_and_eval_callback(log_dir=settings['log_dir'],
+                                     settings=settings,
+                                     hyperparameters=hp,
+                                     model=model,
+                                     eval_freq=settings['evaluate_every'],
+                                     verbose=settings['verbose'],
+                                     training_log="training.log",
+                                     num_evaluations=16,  
+                                     )
     
-    callback.model = model
     write_desc_log( full_fn=os.path.join(settings["log_dir"], f'{settings["run_name"]}_desc.log'), settings=settings, hyperparameters=hp, model=model)
     
     model.explore_for_expert_targets(settings["target_exploration_steps"])
@@ -290,9 +269,6 @@ def main():
     print(f'mean best_step = {np.mean(mean_best_steps)}')
     print(f'mean best_mean_reward = {np.mean(mean_best_mean_rewards)}')
     print(f'mean best_mean_step = {np.mean(mean_best_mean_steps)}')
-    
-    #sys.exit()
-    
+        
 if __name__ == "__main__":
     main()
-    

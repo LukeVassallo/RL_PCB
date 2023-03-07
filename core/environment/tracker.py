@@ -1,11 +1,7 @@
-#import sys
-#sys.path.append('/home/luke/Desktop/semi_autonomous/py/pcb_component_w_vec_distance_v2')
-
 import os, sys
 sys.path.append(os.path.join(os.environ["RL_PCB"], "pcb_component_w_vec_distance_v2"))
 
 from core import video_utils
-
 from collections import deque
 import numpy as np
 
@@ -14,10 +10,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-
-# deque perform memory-efficient appends and pops from either size with approx O(1). On the other hand lists are optimized for fixed-length operations and incur O(n) movement cost for pop and insert.
-
-# If deque is of fixed length, appends that exceed its length will cause the left-most element to be pushed out.
 
 class tracker():
     def __init__(self, maxlen=1024):
@@ -68,7 +60,7 @@ class tracker():
         if kicad_pcb is not None:
             f.write(f'.kicad_pcb={kicad_pcb}\r\n')    
         
-        for i in range(len(self.metrics[0])):   # iterate over the number of components 
+        for i in range(len(self.metrics[0])):    # iterate over the number of components 
             f.write("component begin\r\n")
             f.write(f'\tid={self.metrics[0][i]["id"]}\r\n')
             f.write(f'\tname={self.metrics[0][i]["name"]}\r\n')
@@ -103,8 +95,6 @@ class tracker():
                 raw_HPWL.append(self.metrics[j][i]["raw_HPWL"])
                 
                 weighted_cost.append(self.metrics[j][i]["weighted_cost"])
-
-                #HPWL.append(self.metrics[j][i]["HPWL"])
                 
             ax[0,0].plot(W, label=f'{self.metrics[0][i]["name"]}')
             ax[1,0].plot(raw_W, label=f'{self.metrics[0][i]["name"]}, {np.round(self.metrics[0][i]["Wi"],2)}')
