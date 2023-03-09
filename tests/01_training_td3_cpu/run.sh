@@ -5,17 +5,17 @@ export TEST_DIR=${TEST_DIR}
 echo "Script launched from ${TEST_DIR}"
 echo "RL_PCB repository root is ${RL_PCB}"
 
-cd ${RL_PCB}
+cd ${RL_PCB}/src/training
 ./scheduler.sh --run_config ${TEST_DIR}/run_config.txt --logfile $TEST_DIR/scheduler.log --instances 4 --yes 
 cd ${TEST_DIR}
 
 python report_config.py 
 
-cd ${RL_PCB}
+cd ${RL_PCB}/src/report_generation
 python generate_experiment_report.py --dir ${TEST_DIR}/work --hyperparameters ${TEST_DIR}/hyperparameters/hp_td3.json --report_config ${TEST_DIR}/report_config.json --output ${TEST_DIR}/experiment_report.pdf -y --tmp_dir ${TEST_DIR}/tmp
 cd ${TEST_DIR}
 
-cd ${RL_PCB}
+cd ${RL_PCB}/src/evaluation_scripts
 TD3_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
 SAC_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
 

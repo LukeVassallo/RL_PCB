@@ -7,4 +7,4 @@ echo "RL_PCB=${RL_PCB}"
 echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 echo "PATH=${PATH}"
 
-
+conda activate rl_pcb
