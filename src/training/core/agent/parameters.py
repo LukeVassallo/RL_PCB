@@ -1,4 +1,3 @@
-import datetime
 
 # parse parameters relevant to the environmnet only.
 # do not alter cla in any way. 
@@ -15,7 +14,6 @@ class parameters:
         self.board_height = pcb_params["board_height"]
         self.node = pcb_params["node"]                         # handle to curret node
         self.neighbors = pcb_params["neighbors"]               # list of handles to neighbor nodes
-        #self.nets = pcb_params["nets"]                         # list of net ids 
         self.eoi = pcb_params["eoi"]                           # list of edges of interest
 
         self.net = pcb_params["net"]                       # path to stable baselines 3 neural network. model extracted trom the file extension.
@@ -24,7 +22,6 @@ class parameters:
         self.step_size = pcb_params["step_size"]
         self.max_steps = pcb_params["max_steps"]
         self.ignore_power_nets = True
-        #self.We = pcb_params["We"]
         self.opt_euclidean_distance = pcb_params["opt_euclidean_distance"]
         self.opt_hpwl = pcb_params["opt_hpwl"]
         self.seed = int(pcb_params["seed"])

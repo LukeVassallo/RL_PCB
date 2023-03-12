@@ -14,8 +14,6 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 from reportlab.lib import utils
 from setup_info import machine_info_in_paragraphs, lib_info_in_paragraphs
-sys.path.append('../training')
-from hyperparameters import load_hyperparameters_from_file
 from gen_utils import generate_dataset, generate_plot, generate_multi_agent_plot, generate_multi_agent_plot_w_mean_std, generate_table
 import matplotlib.pyplot as plt
 
@@ -24,6 +22,12 @@ plt.rc('axes', labelsize=14)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=14)# Set the font size for x tick labels
 plt.rc('ytick', labelsize=14)# Set the font size for y tick labels
 plt.rc('legend',fontsize=12) # using a size in points
+
+def load_hyperparameters_from_file(filename):
+    fp = open(filename, 'r')
+    hyperparameters = json.load(fp)
+    
+    return hyperparameters
 
 def get_image(path, width=1*cm):
     img = utils.ImageReader(path)

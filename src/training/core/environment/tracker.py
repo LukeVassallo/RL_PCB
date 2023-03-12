@@ -1,5 +1,4 @@
-import os#, sys
-#sys.path.append(os.path.join(os.environ["RL_PCB"], "pcb_component_w_vec_distance_v2"))
+import os
 
 from core import video_utils
 from collections import deque
@@ -8,7 +7,6 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-#import os
 from datetime import datetime
 
 class tracker():

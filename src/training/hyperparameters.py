@@ -83,37 +83,15 @@ def gen_default_sb3_hyperparameters(algo:str, max_steps:int):
         default_hyperparameters = gen_default_hyperparameters(on_policy=False)
         
     if algo == "TRPO":
-        #default_hyperparameters = {
-            #"learning_rate": 0.001,
-            #"n_steps": 2048,
-            #"batch_size": 128,
-            #}
         default_hyperparameters["learning_rate"] = 0.001
         default_hyperparameters["n_steps"] = 2048
         default_hyperparameters["batch_size"] = 128
 
     elif algo == "PPO":
-        #default_hyperparameters = {
-            #"learning_rate": 0.0003,
-            #"n_steps": 2048,
-            #"batch_size": 64,
-            #}
         default_hyperparameters["learning_rate"] = 0.0003
         default_hyperparameters["n_steps"] = 2048
         default_hyperparameters["batch_size"] = 64
     elif algo == "TD3":
-        #default_hyperparameters = {
-            #"learning_rate": 0.001,
-            #"buffer_size": 1_000_000,
-            #"batch_size": 100,
-            #"train_freq": max_steps,        # trains at the end of the episode
-            #"gradient_steps": max_steps,    # trains at the end of the episode
-            ## Added for multi-agent
-            #"tau": 0.005,                           # Target network update rate
-            #"policy_noise": 0.2,                    # Noise added to target policy during critic update
-            #"noise_clip": 0.5,                      # Range to clip target policy noise
-            #"policy_freq": 2,                       # Frequency of delayed policy updates
-            #}
         default_hyperparameters["learning_rate"] = 0.001
         default_hyperparameters["buffer_size"] = 1_000_000
         default_hyperparameters["batch_size"] = 100
@@ -125,13 +103,6 @@ def gen_default_sb3_hyperparameters(algo:str, max_steps:int):
         default_hyperparameters["policy_freq"] = 2
 
     elif algo == "SAC":
-        #default_hyperparameters = {
-            #"learning_rate": 0.0003,
-            #"buffer_size": 1_000_000,
-            #"batch_size": 256,
-            #"train_freq": 1,                # trains after every step
-            #"gradient_steps": 1,            # trains after every step
-            #}  
         default_hyperparameters["learning_rate"] = 0.0003
         default_hyperparameters["buffer_size"] = 1_000_000
         default_hyperparameters["batch_size"] = 256
@@ -155,8 +126,6 @@ def gen_default_sb3_hyperparameters(algo:str, max_steps:int):
 
 
 def sample_hyperparameters(trial: optuna.Trial, on_policy=False) -> Dict[str, Any]:
-
-    # learning_rate = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
     pi_layers = trial.suggest_int("pi_layers", hp_opt_pi_layers_min, hp_opt_pi_layers_max)
     pi_n_units_l = []
     for i in range(pi_layers):
@@ -178,14 +147,10 @@ def sample_hyperparameters(trial: optuna.Trial, on_policy=False) -> Dict[str, An
         net_arch = {"pi": pi_n_units_l, "qf": qf_n_units_l}
             
     activation_fn = trial.suggest_categorical("activation_fn", ["tanh", "relu"])
-
-    # gamma = trial.suggest_float("gamma", 0.9, 0.99)            
     
     hyperparameters = gen_default_hyperparameters()
-    # hyperparameters["learning_rate"] = learning_rate
     hyperparameters["net_arch"] = net_arch
     hyperparameters["activation_fn"] = activation_fn
-    # hyperparameters["gamma"] = gamma
     
     return hyperparameters
 
@@ -228,7 +193,6 @@ def sample_hyperparameters_hp( trial: optuna.Trial, algo:str, max_steps:int, bas
     if (algo == "TRPO") or (algo == "PPO"):
         learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
         batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024])
-        #n_steps = trial.suggest_categorical("n_steps", [512, 1024, 2048, 4096, 8192])
         n_steps = trial.suggest_int("n_steps", 512, 4096, step=256)        # 14 intervals
         
         hyperparameters["n_steps"] = n_steps
@@ -295,10 +259,6 @@ def save_best_hyperparameters(filename: str, study:optuna.Study, on_policy: bool
         
 def save_best_hyperparameters_hp(filename: str, study:optuna.Study,algo: str, max_steps: int):
     hyperparameters = gen_default_sb3_hyperparameters(algo=algo, max_steps=max_steps)
-    #if (algo == "TRPO") or (algo == "PPO"):
-        #hyperparameters = gen_default_hyperparameters(on_policy=True)
-    #else:
-        #hyperparameters = gen_default_hyperparameters(on_policy=False)
         
     best_params = study.best_params
     hyperparameters["learning_rate"] = best_params["learning_rate"]

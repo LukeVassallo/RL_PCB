@@ -165,8 +165,8 @@ class log_and_eval_callback():
         self.initial_We = self.model.train_env.get_all_target_params()
         
         # log optimals
-        if self.verbose > 1:
-            print(f'Saving initial wirelength values, {self.training_env.get_attr("We")}')
+        if self.verbose > 2:
+            print(f'Saving initial wirelength values, {self.initial_We}')
         f = open(self.optimals, "w")
         f.write(f'intial={self.initial_We}\r\n')
         f.close()
@@ -181,8 +181,8 @@ class log_and_eval_callback():
         self.final_We = self.model.train_env.get_all_target_params()
         
         # log optimals
-        if self.verbose > 1:
-            print(f'Saving final wirelength values, {self.training_env.get_attr("We")}')
+        if self.verbose > 2:
+            print(f'Saving final wirelength values, {self.final_We}')
         f = open(self.optimals, "a")
         f.write(f'final={self.final_We}\r\n')
         f.close()
@@ -266,6 +266,9 @@ class log_and_eval_callback():
         total_reward=0
         total_steps = 0
         for i in range(self.num_evaluations):
+            if self.verbose > 1: 
+                print(f'Starting evaluation {i}/self.num_evaluations with pcb {eval_env.idx}.')
+                
             if training_dataset == True:
                 run_output_dir = self.video_train_path
             else:
@@ -368,7 +371,7 @@ class log_and_eval_callback():
             evaluation_log.write(f'eval_env episode {i} performed {episode_steps} in environment.\r\n')
             if verbose == 1:
                 print(f'eval_env episode {i} performed {episode_steps} in environment.')
-            eval_env.tracker.create_video(fileName=os.path.join(run_output_dir, f'{i}.mp4'))
+            eval_env.tracker.create_video(fileName=os.path.join(run_output_dir, f'{i}.mp4'), display_metrics=False)
             vids = eval_env.tracker.video_tensor()
             self.log_video(vids=vids, tag=video_tag, global_step=i)   
 

@@ -1,21 +1,7 @@
-#import sys
-#sys.path.append('/home/luke/Desktop/semi_autonomous/py/pcb_component_w_vec_distance_v2')
-# import os, sys
-# sys.path.append(os.path.join(os.environ["RL_PCB"], "pcb_component_w_vec_distance_v2"))
 from core import video_utils
 
 from collections import deque
 import numpy as np
-
-# deque perform memory-efficient appends and pops from either size with approx O(1). On the other hand lists are optimized for fixed-length operations and incur O(n) movement cost for pop and insert.
-
-# If deque is of fixed length, appends that exceed its length will cause the left-most element to be pushed out.
-
-# eg.
-# d = deque(maxlen=5)
-# len(d)    # 0
-# for i in range(10): d.append(i)
-# for i in range(5): print(d[i])        # 5,6,7,8,9
 
 class tracker():
     def __init__(self, maxlen=1024):

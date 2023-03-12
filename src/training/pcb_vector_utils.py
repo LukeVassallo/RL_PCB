@@ -17,153 +17,153 @@ def rectangular_to_polar(z):
     theta = np.angle(z)
     return (r, theta)
 
-def compute_pad_referenced_distance_vectors(n, nn, e, ignore_power=False):
-    """
+# def compute_pad_referenced_distance_vectors(n, nn, e, ignore_power=False):
+#     """
     
 
-    Parameters
-    ----------
-    n : TYPE
-        DESCRIPTION.
-    nn : TYPE
-        DESCRIPTION.
-    e : TYPE
-        DESCRIPTION.
+#     Parameters
+#     ----------
+#     n : TYPE
+#         DESCRIPTION.
+#     nn : TYPE
+#         DESCRIPTION.
+#     e : TYPE
+#         DESCRIPTION.
 
-    Returns
-    -------
-    dom : TYPE
-        DESCRIPTION.
-    resultant_vecs : TYPE
-        DESCRIPTION.
-        List of list. The latter containing [ net_id, current_node_id, target_node_id, current_pad_id, target_pad_id ] (r, theta)
-    all_vecs : TYPE
-        DESCRIPTION.
-        List of lists. Each list contains a list of vectors correspond to a specific current_node - target_node pair. 
-        The latter containing [ net_id, current_node_id, target_node_id, current_pad_id, target_pad_id ] (current_pad_x, current_pad_y, target_pad_x, target_pad_y, r, theta)
+#     Returns
+#     -------
+#     dom : TYPE
+#         DESCRIPTION.
+#     resultant_vecs : TYPE
+#         DESCRIPTION.
+#         List of list. The latter containing [ net_id, current_node_id, target_node_id, current_pad_id, target_pad_id ] (r, theta)
+#     all_vecs : TYPE
+#         DESCRIPTION.
+#         List of lists. Each list contains a list of vectors correspond to a specific current_node - target_node pair. 
+#         The latter containing [ net_id, current_node_id, target_node_id, current_pad_id, target_pad_id ] (current_pad_x, current_pad_y, target_pad_x, target_pad_y, r, theta)
 
 
-    The function does the following:
-        #1 Compute connection vectors from current component pad to target neighbor pad. In case multiple pads are involved in a given net, use the one with the shortest distance. 
-        #2 Reduce the vectors between components by summing them up (i.e. obtain the resultant vector between the current component and each of its neighbors)
-        #3 Obtain the direction of movement by summing up all the resultant vectors. 
+#     The function does the following:
+#         #1 Compute connection vectors from current component pad to target neighbor pad. In case multiple pads are involved in a given net, use the one with the shortest distance. 
+#         #2 Reduce the vectors between components by summing them up (i.e. obtain the resultant vector between the current component and each of its neighbors)
+#         #3 Obtain the direction of movement by summing up all the resultant vectors. 
 
-        Notes added after the implementation but no changes to the code were carried out
-        The magnitude of the resultant vector is divded by the number of vectors in the net.
-    """
-    current_node_id = n.get_id()
-    current_node_pos = n.get_pos()
-    net_ids = []
+#         Notes added after the implementation but no changes to the code were carried out
+#         The magnitude of the resultant vector is divded by the number of vectors in the net.
+#     """
+#     current_node_id = n.get_id()
+#     current_node_pos = n.get_pos()
+#     net_ids = []
     
-    # 1 Make a list containing pairs of data points for every net
-    for ee in e:
-        if (ignore_power == True) and (ee.get_power_rail() > 0): 
-            continue
-        if ee.get_net_id() not in net_ids:
-            net_ids.append(ee.get_net_id())
+#     # 1 Make a list containing pairs of data points for every net
+#     for ee in e:
+#         if (ignore_power == True) and (ee.get_power_rail() > 0): 
+#             continue
+#         if ee.get_net_id() not in net_ids:
+#             net_ids.append(ee.get_net_id())
             
             
-    # print(net_ids)
-    pts = []
-    for net_id in net_ids:
-        for ee in e:
-            if ee.get_net_id() == net_id:
-                for i in range(2):
-                    if ee.get_instance_id(i) == current_node_id:
-                        current_pad_pos = ee.get_pos(i)
-                        rotated_current_pad_pos = kicad_rotate(float(current_pad_pos[0]),float(current_pad_pos[1]), n.get_orientation()) # rotate pad positions so that they match the component's orientation
+#     # print(net_ids)
+#     pts = []
+#     for net_id in net_ids:
+#         for ee in e:
+#             if ee.get_net_id() == net_id:
+#                 for i in range(2):
+#                     if ee.get_instance_id(i) == current_node_id:
+#                         current_pad_pos = ee.get_pos(i)
+#                         rotated_current_pad_pos = kicad_rotate(float(current_pad_pos[0]),float(current_pad_pos[1]), n.get_orientation()) # rotate pad positions so that they match the component's orientation
 
-                        neighbor_pad_pos = ee.get_pos(1-i)
-                        for v in nn:
-                            if v.get_id() == ee.get_instance_id(1-i):
-                                break
+#                         neighbor_pad_pos = ee.get_pos(1-i)
+#                         for v in nn:
+#                             if v.get_id() == ee.get_instance_id(1-i):
+#                                 break
                             
-                        rotated_neighbor_pad_pos = kicad_rotate(float(neighbor_pad_pos[0]),float(neighbor_pad_pos[1]), v.get_orientation()) # rotate pad positions so that they match the component's orientation
+#                         rotated_neighbor_pad_pos = kicad_rotate(float(neighbor_pad_pos[0]),float(neighbor_pad_pos[1]), v.get_orientation()) # rotate pad positions so that they match the component's orientation
                         
-                        neighbor_node_pos = v.get_pos()
+#                         neighbor_node_pos = v.get_pos()
                         
-                        header = [net_id,
-                                    current_node_id,
-                                    v.get_id(),
-                                    ee.get_pad_id(i),      # current node pad id
-                                    ee.get_pad_id(1-i)]    # target node pad id
+#                         header = [net_id,
+#                                     current_node_id,
+#                                     v.get_id(),
+#                                     ee.get_pad_id(i),      # current node pad id
+#                                     ee.get_pad_id(1-i)]    # target node pad id
                         
-                        sx = current_node_pos[0] + rotated_current_pad_pos[0]
-                        sy = current_node_pos[1] + rotated_current_pad_pos[1]
-                        dx = neighbor_node_pos[0] + rotated_neighbor_pad_pos[0]
-                        dy = neighbor_node_pos[1] + rotated_neighbor_pad_pos[1]
+#                         sx = current_node_pos[0] + rotated_current_pad_pos[0]
+#                         sy = current_node_pos[1] + rotated_current_pad_pos[1]
+#                         dx = neighbor_node_pos[0] + rotated_neighbor_pad_pos[0]
+#                         dy = neighbor_node_pos[1] + rotated_neighbor_pad_pos[1]
                         
-                        delta_y = (sy-dy)
-                        delta_x = (dx-sx)
+#                         delta_y = (sy-dy)
+#                         delta_x = (dx-sx)
                         
-                        euclidean_dist = np.sqrt(np.square(delta_x) + np.square(delta_y))
-                        angle = np.arctan(delta_y/delta_x)
-                        if (delta_x < 0): angle += np.pi
+#                         euclidean_dist = np.sqrt(np.square(delta_x) + np.square(delta_y))
+#                         angle = np.arctan(delta_y/delta_x)
+#                         if (delta_x < 0): angle += np.pi
                         
                         
-                        # 2 Remove duplicates by taking the shorter ones
-                        found = False
-                        for i in range(len(pts)):
-                            if pts[i][0:5] == header:         
-                                found = True
-                                if pts[i][-2] > euclidean_dist:
-                                    pts[i] = header + [
-                                                sx,
-                                                sy,
-                                                dx,
-                                                dy,
-                                                euclidean_dist,
-                                                angle
-                                                ]
-                                    break
+#                         # 2 Remove duplicates by taking the shorter ones
+#                         found = False
+#                         for i in range(len(pts)):
+#                             if pts[i][0:5] == header:         
+#                                 found = True
+#                                 if pts[i][-2] > euclidean_dist:
+#                                     pts[i] = header + [
+#                                                 sx,
+#                                                 sy,
+#                                                 dx,
+#                                                 dy,
+#                                                 euclidean_dist,
+#                                                 angle
+#                                                 ]
+#                                     break
                         
-                        if not found: pts.append( header + [sx, sy, dx, dy, euclidean_dist, angle])
+#                         if not found: pts.append( header + [sx, sy, dx, dy, euclidean_dist, angle])
                         
-    # print('\nPoints for vector calculations')
-    # for p in pts: print(p)                               
+#     # print('\nPoints for vector calculations')
+#     # for p in pts: print(p)                               
         
-    # 3 Compute vectors
-    # p[2:3] -> current_node_id, current_pad_id
-    vec_sc = []
-    for p in pts:
-        if p[2:3] not in vec_sc:
-            vec_sc.append(p[2:3])
+#     # 3 Compute vectors
+#     # p[2:3] -> current_node_id, current_pad_id
+#     vec_sc = []
+#     for p in pts:
+#         if p[2:3] not in vec_sc:
+#             vec_sc.append(p[2:3])
             
-    all_vecs = []
-    for i in vec_sc:
-        tmp = []
-        for p in pts:
-            if p[2:3] == i:
-                tmp.append(p)
-        all_vecs.append(tmp)
+#     all_vecs = []
+#     for i in vec_sc:
+#         tmp = []
+#         for p in pts:
+#             if p[2:3] == i:
+#                 tmp.append(p)
+#         all_vecs.append(tmp)
         
-    # print("\nSorted vectors")
-    # for vecs in all_vecs:
-    #     print(vecs)
+#     # print("\nSorted vectors")
+#     # for vecs in all_vecs:
+#     #     print(vecs)
         
-    resultant_vecs = []
-    # The simplest way to add two polar vectors is by converting them to 
-    # rectangular form, summing them up and converting them back to polar.
-    for vecs in all_vecs:
-            v_pts = []
-            for v in vecs:
-                v_pts.append(polar_to_rectangular(v[-2]/len(pts),v[-1])) # Divide the magnitude of a vector the sum of vectors in the list.
+#     resultant_vecs = []
+#     # The simplest way to add two polar vectors is by converting them to 
+#     # rectangular form, summing them up and converting them back to polar.
+#     for vecs in all_vecs:
+#             v_pts = []
+#             for v in vecs:
+#                 v_pts.append(polar_to_rectangular(v[-2]/len(pts),v[-1])) # Divide the magnitude of a vector the sum of vectors in the list.
             
-            z = rectangular_to_polar(np.sum(v_pts))
-            resultant_vecs.append([v[0:5], z])
+#             z = rectangular_to_polar(np.sum(v_pts))
+#             resultant_vecs.append([v[0:5], z])
     
-    # print("\nResultant vectors")
-    # for r in resultant_vecs:
-    #     print(r)
+#     # print("\nResultant vectors")
+#     # for r in resultant_vecs:
+#     #     print(r)
         
-    # print("\nDirection of movement")
-    v_pts = []
-    for v in resultant_vecs:
-        v_pts.append(polar_to_rectangular(v[-1][0], v[-1][1]))
+#     # print("\nDirection of movement")
+#     v_pts = []
+#     for v in resultant_vecs:
+#         v_pts.append(polar_to_rectangular(v[-1][0], v[-1][1]))
     
-    dom = rectangular_to_polar(np.sum(v_pts))
-    # print(dom)
-    return dom, resultant_vecs, all_vecs
+#     dom = rectangular_to_polar(np.sum(v_pts))
+#     # print(dom)
+#     return dom, resultant_vecs, all_vecs
 
 def compute_pad_referenced_distance_vectors_v2(n, nn, e, ignore_power=False):
     """

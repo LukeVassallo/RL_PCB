@@ -1,6 +1,4 @@
-import os, sys
-#sys.path.append('/home/luke/Desktop/semi_autonomous/py')
-sys.path.append(os.path.join(os.environ["RL_PCB"], "py"))
+import os
 from data_augmenter import dataAugmenter
 import pcb.pcb as pcb
 import graph.graph as graph     # Necessary for graph related methods
@@ -9,11 +7,9 @@ from core.agent.agent import agent as agent
 from core.agent.parameters import parameters as agent_parameters
 from core.environment.tracker import tracker
 
-
 from pcbDraw import draw_board_from_board_and_graph_with_debug, draw_ratsnest_with_board
 
 import numpy as np
-import os
 import random as random_package
 
 class environment:
@@ -49,7 +45,6 @@ class environment:
                        augment_orientation=self.parameters.augment_orientation,
                        rng = self.rng)
                 
-        #self.We.append(compute_sum_of_euclidean_distances_between_pads(self.node, self.neighbors, self.eoi))
         self.padding=4
 
     def reset(self):        
@@ -81,7 +76,6 @@ class environment:
         for i in range(len(self.agents)):   # Computes the wirelength and HPWL
             self.agents[i].reset()     
 
-        #comp_grids = draw_board_from_nodes_multi_agent(self.nodes, self.b.get_width(), self.b.get_height(), padding=4)
         if self.parameters.debug:
             comp_grids = draw_board_from_board_and_graph_with_debug(self.b, self.g, padding=self.padding)
             for i in range(len(self.agents)):
@@ -94,20 +88,6 @@ class environment:
 
         return
 
-    # def _step(self, observation, deterministic=True):
-    #     # print(observation)
-    #     print()
-    #     obsNstuff = []
-    #     for i in range(len(self.all_agents)):
-    #         # print('reset', a.parameters.node.get_name(), hex(id(a.parameters.node)))
-    #         # print(observation[i])
-    #         obsNstuff.append(self.all_agents[i]._step(observation=observation[i], deterministic=deterministic))
-
-    #     comp_grids = draw_board_from_board_and_graph(self.b, self.g)
-    #     self.tracker.add_comp_grids(comp_grids=comp_grids)
-
-    #     return obsNstuff
-
     def step(self, model, random=False, deterministic:bool = False, rl_model_type:str ="TD3"):
         observation_vec = []
         step_metrics = []
@@ -119,7 +99,6 @@ class environment:
         if self.parameters.shuffle_idxs == True:
             random_package.shuffle(idxs)
         
-        # for i in range(len(self.agents)):
         for i in idxs:
             state, next_state, reward, action, done = self.agents[i].step(model=model, random=random, deterministic=deterministic, rl_model_type=rl_model_type)
             # convert state_vector
@@ -167,21 +146,13 @@ class environment:
             self.tracker.add(comp_grids=comp_grids,ratsnest=ratsnest)
 
         self.tracker.add_metrics(step_metrics)
-        return observation_vec
-        # return observation, reward, done, {}
-        # for i in range(len(self.all_agents)):
-        #     state, next_state, reward, action, done = self.all_agents[i].step()
-        #     if done: break
-        
-
+        return observation_vec   
 
     def initialize_environment_state_from_pcb(self, init = False, idx=None):
-        #self.p = self.pv[0]                             # Assuming one pcb.
         if idx==None:
             self.idx = int(self.rng.integers(len(self.pv)))
         else:
             self.idx = idx
-        # print(f"Loading pcb with idx={self.idx}")
         self.p = self.pv[self.idx]
         
         if init: self.agents = []
@@ -194,7 +165,6 @@ class environment:
         for i in range(len(nn)):
             if nn[i].get_isPlaced() == 0:
                 node_id = nn[i].get_id()
-                #node = self.g.get_node_by_id(node_id)
                 nets = []
     
                 neighbor_ids = self.g.get_neighbor_node_ids(node_id)
@@ -210,7 +180,6 @@ class environment:
                         nets.append(e.get_net_id())  
                         
                 if init:
-                    #print(nn[i].get_id(),nn[i].get_name())
                     agent_params = agent_parameters({"board": self.b,
                                                      "graph": self.g,
                                                      "board_width": self.b.get_width(),
@@ -245,10 +214,10 @@ class environment:
 
     def get_target_params(self):
         target_params = []
-        for agent in self.agents:
-            target_params.append({"id": agent.parameters.node.get_id(),
-             "We": agent.We,
-             "HPWLe": agent.HPWLe })
+        for agnt in self.agents:
+            target_params.append({"id": agnt.parameters.node.get_id(),
+             "We": agnt.We,
+             "HPWLe": agnt.HPWLe })
             
         return target_params
             
@@ -273,8 +242,8 @@ class environment:
 
         """
         
-        for agent in self.agents:
-            agent.print()
+        for agnt in self.agents:
+            agnt.print()
         
     def library_info(self):
         graph.build_info()
@@ -311,9 +280,9 @@ class environment:
         pv.append(self.pv[self.idx])
         g = pv[0].get_graph()
         g.update_hpwl(do_not_ignore_unplaced=True)
-        g.reset_component_origin(self.b)   # >>> VERY VERY IMPORTANT <<<
-        pcb.write_pcb_file(save_loc, pv, False)      # append = False    
-        g.set_component_origin_to_zero(self.b)   # >>> VERY VERY IMPORTANT <<<
+        g.reset_component_origin(self.b)                # >>> VERY VERY IMPORTANT <<<
+        pcb.write_pcb_file(save_loc, pv, False)         # append = False    
+        g.set_component_origin_to_zero(self.b)          # >>> VERY VERY IMPORTANT <<<
 
     def calc_hpwl(self):
         return self.g.calc_hpwl(True)

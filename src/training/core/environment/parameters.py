@@ -1,5 +1,3 @@
-import datetime
-
 # parse parameters relevant to the environmnet only.
 # do not alter cla in any way. 
 class parameters: 
