@@ -1,0 +1,1 @@
+{"learning_rate": 0.0003, "buffer_size": 2400000, "n_steps": 2048, "batch_size": 256, "gamma": 0.99, "net_arch": {"pi": [400, 300], "qf": [400, 300]}, "activation_fn": "relu", "expl_noise": 0.1, "tau": 0.005, "policy_noise": 0.2, "noise_clip": 0.5, "policy_freq": 1}
