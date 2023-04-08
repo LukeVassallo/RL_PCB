@@ -5,6 +5,11 @@ export EXP_DIR=${EXP_DIR}
 echo "Script launched from ${EXP_DIR}"
 echo "RL_PCB repository root is ${RL_PCB}"
 
+mkdir -p work
+echo "Starting tensorboard ... "
+tensorboard --logdir ./work/ --host 0.0.0.0 &
+sleep 2
+
 cd ${RL_PCB}/src/training
 
 ./scheduler.sh --run_config ${EXP_DIR}/run_config.txt --logfile $EXP_DIR/scheduler.log --instances 4 --yes 
