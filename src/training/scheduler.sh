@@ -114,7 +114,7 @@ then
         fi
     fi
     
-    printf "\n$(date +"%Y-%m-%dT%H:%M:%S%:z")\n\n" >> $LOGFILE
+    printf "\nStarting $(date +"%Y-%m-%dT%H:%M:%S%:z")\n\n" >> $LOGFILE
 
     # The following ensures that at any given moment N items are executing.
     #N=3
@@ -139,6 +139,8 @@ then
 
     wait # Waits on all processes to finish before moving on
     echo ""
+    
+    printf "\nExiting $(date +"%Y-%m-%dT%H:%M:%S%:z")\n\n" >> $LOGFILE
     
 else
 	echo "Terminating on user's request."

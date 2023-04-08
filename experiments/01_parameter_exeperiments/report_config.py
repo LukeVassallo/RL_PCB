@@ -15,28 +15,70 @@ def load_report_config(filename):
     return report_config    
         
 charts = {
-    'experiment_0_0_variable_who_6_2_2_TD3': {  'experiments':['parameter_experiment_622'],
-                                            'algorithms': ['TD3'],
-                                            'multi_agent': True,
-                                            'window': 10,
-                                            'title': "Parameter test w/ emphasis on wirelength (W=6, H=2, O=2)",
-                                            'xlabel': "Timesteps (unit)",
-                                            'ylabel': "Average return (unit)",
-                                            'label':    {
-                                                        # PARTIALLY SUPPORTED FOR MULTI AGENT
-                                                        },   
-                                            },        
-    'experiment_0_0_variable_who_2_6_2_TD3': {  'experiments':['parameter_experiment_262'],
-                                            'algorithms': ['TD3'],
-                                            'multi_agent': True,
-                                            'window': 10,
-                                            'title': "Parameter test w/ emphasis on HPWL (W=2, H=6, O=2)",
-                                            'xlabel': "Timesteps (unit)",
-                                            'ylabel': "Average return (unit)",
-                                            'label':    {
-                                                        # PARTIALLY SUPPORTED FOR MULTI AGENT
-                                                        },   
-                                            },                                              
+    'parameter_test_622': { 'experiments':['parameter_experiment_622'],
+                            'algorithms': ['TD3', 'SAC'],
+                            'multi_agent': True,
+                            'mean_std_plot': True,
+                            'ylim_bot': -1000,
+                            'xscale': 'k',
+                            'window': 100,
+                            'title': "Parameter test w/ emphasis on EW", #(W=6, H=2, O=2)
+                            'xlabel': "Timesteps (unit)",
+                            'ylabel': "Average return (unit)",
+                            'label': {
+                                         # PARTIALLY SUPPORTED FOR MULTI AGENT
+                                         'parameter_experiment_622:TD3': 'TD3',
+                                         'parameter_experiment_622:SAC': 'SAC',
+                                     },   
+                           }, 
+    'parameter_test_262': { 'experiments':['parameter_experiment_262'],
+                            'algorithms': ['TD3', 'SAC'],
+                            'multi_agent': True,
+                            'mean_std_plot': True,
+                            'ylim_bot': -1000,
+                            'xscale': 'k',
+                            'window': 100,
+                            'title': "Parameter test w/ emphasis on HPWL",
+                            'xlabel': "Timesteps (unit)",
+                            'ylabel': "Average return (unit)",
+                            'label': {
+                                         # PARTIALLY SUPPORTED FOR MULTI AGENT
+                                         'parameter_experiment_262:TD3': 'TD3',
+                                         'parameter_experiment_262:SAC': 'SAC',
+                                     },   
+                           },
+    'parameter_test_226': { 'experiments':['parameter_experiment_226'],
+                            'algorithms': ['TD3', 'SAC'],
+                            'multi_agent': True,
+                            'mean_std_plot': True,
+                            'ylim_bot': -1000,
+                            'xscale': 'k',
+                            'window': 100,
+                            'title': "Parameter test w/ emphasis on overlap",
+                            'xlabel': "Timesteps (unit)",
+                            'ylabel': "Average return (unit)",
+                            'label': {
+                                         # PARTIALLY SUPPORTED FOR MULTI AGENT
+                                         'parameter_experiment_226:TD3': 'TD3',
+                                         'parameter_experiment_226:SAC': 'SAC',
+                                     },   
+                           },
+    'parameter_test_442': { 'experiments':['parameter_experiment_442'],
+                            'algorithms': ['TD3', 'SAC'],
+                            'multi_agent': True,
+                            'mean_std_plot': True,
+                            'ylim_bot': -1000,
+                            'xscale': 'k',
+                            'window': 100,
+                            'title': "Parameter test w/ emphasis on wirelength", #(W=6, H=2, O=2)
+                            'xlabel': "Timesteps (unit)",
+                            'ylabel': "Average return (unit)",
+                            'label': {
+                                         # PARTIALLY SUPPORTED FOR MULTI AGENT
+                                         'parameter_experiment_442:TD3': 'TD3',
+                                         'parameter_experiment_442:SAC': 'SAC',
+                                     },   
+                           },                                                                                 
          }
     
 tables = {

@@ -149,8 +149,20 @@ def main():
     report_data = []
     report_data.append(Paragraph('Experiment Report',styleH1))
     report_data.append(Paragraph(f'Start of automated test report {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',style)) 
-    report_data.append(Paragraph(f'Author={os.environ["USERNAME"]}@{os.uname()[1]} obo Luke Vassallo',style))
-    
+
+    #try:
+    #    uname = os.environ["USERNAME"]
+    #except:
+    #    uname = "unknown"
+
+    #report_data.append(Paragraph(f'Author={uname}@{os.uname()[1]} obo Luke Vassallo',style))
+   
+    try:
+        report_data.append(Paragraph(f'Author={os.environ["USERNAME"]}@{os.uname()[1]} obo {rc["author"]}',style))
+    except:
+        print("Could not get 'USERNAME'. This may happen in an RDP session.")
+        report_data.append(Paragraph(f'Author=UNKNOWN@{os.uname()[1]} obo {rc["author"]}',style))
+
     report_data.append(Paragraph('Machine Information',styleH1))
     report_data += machine_info_in_paragraphs(style)
     report_data.append(Paragraph('Library Information',styleH1))  

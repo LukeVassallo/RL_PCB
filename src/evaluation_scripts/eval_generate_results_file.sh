@@ -123,7 +123,7 @@ for board in ${EVALUATION_DIR}/* ; do
             if [ ! -f $logfile ]; then
                 continue
             fi
-
+            echo "[DEBUG - eval_generate_results_file] - Using file -> $logfile"	    
             if [ ${logfile: -24:-4} == "best_hpwl_00_overlap" ]; then
                 extract_parameters $logfile
                 echo "$brd,$trial_name,${logfile: -24:-4},$HPWL,$OL,$RWL" >> ${EVALUATION_DIR}/results.txt                

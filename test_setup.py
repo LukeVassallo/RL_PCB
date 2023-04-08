@@ -74,3 +74,10 @@ else:
 
 graph.build_info()
 pcb.build_info()
+
+print('')
+print('Testing place and route binaries')
+print(f"Testing kicadParser ... {'OK' if os.system('./bin/kicadParser --help > /dev/null') == 0 else 'Failed'}")
+print(f"Testing sa ... {'OK' if os.system('./bin/sa --help > /dev/null') == 0 else 'Failed'}")
+print(f"Testing pcb_router ... {'OK' if os.system('./bin/pcb_router --help > /dev/null') == 0 else 'Failed'}")
+print('')

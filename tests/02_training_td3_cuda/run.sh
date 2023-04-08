@@ -19,6 +19,6 @@ cd ${RL_PCB}/src/evaluation_scripts
 TD3_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
 SAC_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
 
-./eval_just_do_it.sh -p ${RL_PCB}/dataset/base/evaluation.pcb -b ${RL_PCB}/dataset/base_raw --bin_dir ${RL_PCB}/bin --path_prefix "" -d ${TEST_DIR}/work -e training_td3_cuda_622 --report_type both,mean -o ${TD3_EVAL_TESTING_DIR} --runs 2 --max_steps 200 --report_type both,mean --skip_simulated_annealing --workers 6
+./eval_just_do_it.sh -p ${RL_PCB}/dataset/base/evaluation.pcb -b ${RL_PCB}/dataset/base_raw --bin_dir ${RL_PCB}/bin --path_prefix "" -d ${TEST_DIR}/work -e training_td3_cuda_622 --report_type both,mean -o ${TD3_EVAL_TESTING_DIR} --runs 2 --max_steps 200 --report_type both,mean
 
 cd ${TEST_DIR}

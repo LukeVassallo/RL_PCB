@@ -73,7 +73,6 @@ def cmdLine_args():
     parser.add_argument("--auto_seed", required=False, action='store_true', default=False, help='ignore seed value and generate one based of the current time for everyrun')
     parser.add_argument("--verbose", required=False, type=int, default=0, help="Program verbosity")
     parser.add_argument("-o", "--output", required=False, type=str, default="./eval_output")
-    parser.add_argument("--workers", required=False, type=int, default=2, help="number of workers on which 'runs' will execute.")
     parser.add_argument("--quick_eval", required=False, action='store_true', default=False, help="When true video and run log will not be generated.")
     parser.add_argument("--reward_params",  type=str, required=True, help="Colon seperated weights for euclidean wirelength, hpwl and overlap")
     parser.add_argument("--shuffle_idxs", required=False, action='store_true', help="shuffle agent idx prior to stepping in the environment")
@@ -96,7 +95,6 @@ def cmdLine_args():
     settings["run_name"] = datetime.now().strftime('%s')
     settings["verbose"] = args.verbose
     settings["output"] = args.output
-    settings["workers"] = args.workers
     settings["quick_eval"] = args.quick_eval
     
     rp = args.reward_params.split(':')
@@ -320,33 +318,6 @@ def evaluation_run(settings):
 
 def main():
     args, settings = cmdLine_args()
-    
-    #debug
-    #print(settings)
-    
-    # When uncommented runs and workers arguments will be used
-    # UNCOMMENT START
-    #manager = multiprocessing.Manager()
-    #results = manager.list()
-    #work = manager.Queue(settings["workers"])
-    
-    ## start for workers
-    #pool = []
-    #for i in range(settings["workers"]):
-        #p = multiprocessing.Process(target=do_work, args=(work, results))
-        #p.start()
-        #pool.append(p)
-    
-    #for run in range(settings["runs"]):
-        #settings['run'] = run
-        #work.put([settings])
-    
-    #for i in range(settings["workers"]):
-        #work.put(None)
-    
-    #for p in pool:
-        #p.join()
-    # UNCOMMENT STOP        
     
     for run in range(settings["runs"]):
         settings['run'] = run

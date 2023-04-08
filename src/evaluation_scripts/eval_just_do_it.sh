@@ -8,7 +8,6 @@ PATH_PREFIX="."
 REPORT_TYPE="mean"
 SKIP_SA=false
 SHUFFLE=false
-WORKERS=4
 MAX_STEPS=600
 DEVICE="cuda"
 
@@ -89,11 +88,6 @@ while [[ $# -gt 0 ]]; do
             SKIP_SA=true
             shift   # past argument
             ;;  
-        -w|--workers)
-            WORKERS="$2"
-            shift
-            shift
-            ;;
         --help)
             print_help
             exit 0
@@ -125,7 +119,6 @@ echo "Experiment (EXP)                   $ALL_EXP"
 echo "Output (OUTPUT)                    $OUTPUT"
 echo "Pcb file (PCB)                     $PCB"
 echo "Skip simulated annealing (SKIP_SA) $SKIP_SA"
-echo "Workers (WORKERS)                  $WORKERS"
 echo ""
 sleep 1
 
@@ -212,9 +205,9 @@ for EXP in ${ALL_EXP}; do
 #                     echo "[DEBUG] REWARD_PARAMS=$REWARD_PARAMS"
 
                     if [ "$SHUFFLE" = false ]; then
-                        python eval_run_rl_policy.py --policy ${RL_MODEL_TYPE} --model="${EXP_DIR}/${RUN_NAME}_${RUN}_${RL_MODEL_TYPE}/models/best_mean" --pcb_file $PCB --hyperparameters $PATH_PREFIX/$HYPERPARAMETERS --max_steps $MAX_STEPS --runs $RUNS --reward_params $REWARD_PARAMS --output $OUTPUT/${RUN_NAME}_${RUN} --workers $WORKERS --quick_eval --device $DEVICE #&> /dev/null   
+                        python eval_run_rl_policy.py --policy ${RL_MODEL_TYPE} --model="${EXP_DIR}/${RUN_NAME}_${RUN}_${RL_MODEL_TYPE}/models/best_mean" --pcb_file $PCB --hyperparameters $PATH_PREFIX/$HYPERPARAMETERS --max_steps $MAX_STEPS --runs $RUNS --reward_params $REWARD_PARAMS --output $OUTPUT/${RUN_NAME}_${RUN} --quick_eval --device $DEVICE #&> /dev/null   
                     else
-                        python eval_run_rl_policy.py --policy ${RL_MODEL_TYPE} --model="${EXP_DIR}/${RUN_NAME}_${RUN}_${RL_MODEL_TYPE}/models/best_mean" --pcb_file $PCB --hyperparameters $PATH_PREFIX/$HYPERPARAMETERS --max_steps $MAX_STEPS --runs $RUNS --reward_params $REWARD_PARAMS --output $OUTPUT/${RUN_NAME}_${RUN} --workers $WORKERS --quick_eval --device $DEVICE --shuffle_idxs #&> /dev/null   
+                        python eval_run_rl_policy.py --policy ${RL_MODEL_TYPE} --model="${EXP_DIR}/${RUN_NAME}_${RUN}_${RL_MODEL_TYPE}/models/best_mean" --pcb_file $PCB --hyperparameters $PATH_PREFIX/$HYPERPARAMETERS --max_steps $MAX_STEPS --runs $RUNS --reward_params $REWARD_PARAMS --output $OUTPUT/${RUN_NAME}_${RUN} --quick_eval --device $DEVICE --shuffle_idxs #&> /dev/null   
                     fi
                  
                     
@@ -240,6 +233,6 @@ for RT in ${REPORT_TYPE}; do
     if [ "$SKIP_SA" = false ]; then
         python eval_report_generator.py --run_dirs ${allRuns[*]} --experiments ${allExps[*]} --reward_params ${allRewardParms[*]} --max_steps $MAX_STEPS --report_type=${RT} --output ${OUTPUT}/evaluation_report_${RT}.pdf &> /dev/null
     else
-        python eval_report_generator.py --run_dirs ${allRuns[*]} --experiments ${allExps[*]} --reward_params ${allRewardParms[*]} --max_steps $MAX_STEPS   --report_type=${RT}  --output ${OUTPUT}/evaluation_report_${RT}.pdf --skip_simulated_annealing &> /dev/null
+        python eval_report_generator.py --run_dirs ${allRuns[*]} --experiments ${allExps[*]} --reward_params ${allRewardParms[*]} --max_steps $MAX_STEPS --report_type=${RT} --output ${OUTPUT}/evaluation_report_${RT}.pdf --skip_simulated_annealing &> /dev/null
     fi
 done
