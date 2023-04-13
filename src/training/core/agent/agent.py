@@ -25,9 +25,9 @@ class agent(gym.Env):
         self.action_space = spaces.Box(low=np.array([0,0,0], dtype=np.float32), high=np.array([1,2*np.pi,1], dtype=np.float32))      
 
         self.tracker = tracker()
-
         self.rng = np.random.default_rng(seed=self.parameters.seed)
-        
+        self.action_space.seed(self.parameters.seed)                    # action spaces uses their own random number generator.
+
         # self.max_steps = 200
         self.max_steps = self.parameters.max_steps
         self.steps_done = 0
@@ -68,7 +68,6 @@ class agent(gym.Env):
         
         if random == True:
             action = self.action_space.sample()
-            
             if rl_model_type == "TD3":
                 model_action = [0,0,0]#action
                 model_action[0] = (action[0] - 0.5) * 2
