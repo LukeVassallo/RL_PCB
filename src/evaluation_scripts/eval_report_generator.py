@@ -161,7 +161,7 @@ def main():
         report_data.append(Paragraph(f'Author={os.environ["USERNAME"]}@{os.uname()[1]} obo {rc["author"]}',style))
     except:
         print("Could not get 'USERNAME'. This may happen in an RDP session.")
-        report_data.append(Paragraph(f'Author=UNKNOWN@{os.uname()[1]} obo {rc["author"]}',style))
+        report_data.append(Paragraph(f'Author=UNKNOWN@{os.uname()[1]} obo Luke Vassallo',style))
 
     report_data.append(Paragraph('Machine Information',styleH1))
     report_data += machine_info_in_paragraphs(style)

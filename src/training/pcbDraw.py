@@ -131,25 +131,8 @@ def draw_board2(g_pad, g_comp, bx, by, padding=None):
             box = np.int0(box)  # ensure that box point are integers
             cv2.drawContours(grid_pads,[box],0,(64),-1)
     
-    for v in g_comp[0]:
-        # print(f'size     : ({v[0]},{v[1]})')
-        # print(f'pos      : ({v[2]},{v[3]})')
-        
-        if (v[4] == 90.0) or (v[4] == 270):
-            vx = float(v[1]/2)
-            vy = float(v[0]/2)
-        else:
-            vx = float(v[0]/2)
-            vy = float(v[1]/2)   
-   
-        # method #1 - Draw a rectangle with two points.            
-        # xmin = int( (float(v[2]) - vx) / r )
-        # xmax = int( (float(v[2]) + vx) / r )
-        # ymin = int( (float(v[3]) - vy) / r )
-        # ymax = int( (float(v[3]) + vy) / r )        
-        # cv2.rectangle(grid, (xmin,ymin), (xmax,ymax), (32), -1)
-        
-        # method #2 - Draw a rectange with center, size and angle.
+    for v in g_comp[0]:        
+        # Draw a rectange with center, size and angle.
         if padding is not None:
             xc = float(v[2]) / r + int(padding/r) 
             yc = float(v[3]) / r + int(padding/r)
@@ -204,7 +187,6 @@ def draw_board_from_board_and_graph(b, g, draw_placed=True, draw_unplaced=True, 
 
     """       
     nv = g.get_nodes()
-    ev = g.get_edges()
     
     # Setup grid
     x = b.get_width() / r;
@@ -214,8 +196,6 @@ def draw_board_from_board_and_graph(b, g, draw_placed=True, draw_unplaced=True, 
         grid_comps = np.zeros((2,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((2,int(x),int(y),1), np.uint8)
-    padded_grid_comps = []
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
                                  
     for n in nv:       
         # if (n.get_isPlaced() == 1):
@@ -279,7 +259,6 @@ def draw_board_from_board_and_graph_with_debug(b, g, draw_placed=True, draw_unpl
 
     """       
     nv = g.get_nodes()
-    ev = g.get_edges()
     
     # Setup grid
     x = b.get_width() / r;
@@ -289,8 +268,6 @@ def draw_board_from_board_and_graph_with_debug(b, g, draw_placed=True, draw_unpl
         grid_comps = np.zeros((3,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((3,int(x),int(y),1), np.uint8)
-    padded_grid_comps = []
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
                                  
     for n in nv:       
         # if (n.get_isPlaced() == 1):
@@ -364,7 +341,6 @@ def draw_board_from_board_and_graph_multi_agent(b, g, node_id, draw_placed=True,
 
     """       
     nv = g.get_nodes()
-    ev = g.get_edges()
     
     # Setup grid
     x = b.get_width() / r;
@@ -374,8 +350,6 @@ def draw_board_from_board_and_graph_multi_agent(b, g, node_id, draw_placed=True,
         grid_comps = np.zeros((len(nv)+1,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((len(nv)+1,int(x),int(y),1), np.uint8)
-    padded_grid_comps = []
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
     idx = 2                                 
     for n in nv:       
         # if (n.get_isPlaced() == 1):
@@ -429,7 +403,6 @@ def draw_comps_from_nodes_and_edges(n, nn, e, b, padding=None):
         grid_comps = np.zeros((2,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((2,int(x),int(y),1), np.uint8)
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
     
     # draw current node
     pos = n.get_pos()
@@ -495,7 +468,6 @@ def draw_board_from_nodes_and_edges(n, nn, e, bx, by, padding=None):
         grid_comps = np.zeros((2,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((2,int(x),int(y),1), np.uint8)
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
     
     # draw current node
     pos = n.get_pos()
@@ -563,7 +535,6 @@ def draw_board_from_nodes_and_edges_multi_agent(n, nn, e, bx, by, padding=None):
         grid_comps = np.zeros((len(nn)+2,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((len(nn)+2,int(x),int(y),1), np.uint8)
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
     
     # draw current node
     pos = n.get_pos()
@@ -637,7 +608,6 @@ def draw_board_from_graph_multi_agent(g, node_id, bx, by, padding=None):
         grid_comps = np.zeros((len(all_nodes)+1,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((len(all_nodes)+1,int(x),int(y),1), np.uint8)
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
     
     # draw current node
     # pos = n.get_pos()
@@ -710,7 +680,6 @@ def draw_board_from_nodes_multi_agent(n, bx, by, padding=None):
         grid_comps = np.zeros((2,int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid_comps = np.zeros((2,int(x),int(y),1), np.uint8)
-    grid_pads = np.zeros((int(x),int(y),1), np.uint8)
                        
     # draw nodes
     for v in n:        
@@ -1079,12 +1048,11 @@ def draw_debug(n, bx, by, padding=None):
     #     p1 = (int(pos_x/r), int(pos_y/r))   
     #     p12 = np.array(kicad_rotate(0, size_y*-1.2, -i))  # function returns a list
     #     p2 = (int((pos_x+p12[0])/r), int((pos_y+p12[1])/r))
-        
 
     #     cv2.line(grid, p1, p2, (64), 2)
     #     cv2.imshow('debug_grid', grid)
     #     cv2.waitKey(10)
-        
+
     x = bx / r;
     y = by / r;
     if padding is not None:
@@ -1122,9 +1090,8 @@ def draw_debug(n, bx, by, padding=None):
                 org=text_origin,
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=0.4,
-                color=(128))    
-    # print(p1)
-    # print(p2)
+                color=128)    
+
     cv2.line(grid, p1, p2, (255), 2)
     # cv2.imshow('debug_grid', grid)
     
@@ -1153,17 +1120,12 @@ def draw_node_name(n, bx, by, padding=None, loc="top_right", designator_only=Fal
 
     """
         
-    x = bx / r;
-    y = by / r;
+    x = bx / r
+    y = by / r
     if padding is not None:
         grid = np.zeros((int(x)+2*int(padding/r),int(y)+2*int(padding/r),1), np.uint8)
     else:
         grid = np.zeros((int(x),int(y),1), np.uint8)
-    
-    pos_x = n.get_pos()[0]
-    pos_y = n.get_pos()[1]
-    size_x = n.get_size()[0]/2 
-
 
     if loc == "top_left":
         if padding == None:
@@ -1194,11 +1156,11 @@ def draw_node_name(n, bx, by, padding=None, loc="top_right", designator_only=Fal
                     org=text_origin,
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=0.4,
-                    color=(127))    
+                    color=127)    
 
     # this is dumb, but needed so arrays are matching. copyMakeBorder reshapes the output image.
     if padding is not None:
-        return cv2.copyMakeBorder(grid, 0, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0))
+        return cv2.copyMakeBorder(grid, 0, 0, 0, 0, cv2.BORDER_CONSTANT, value=0)
     else:   
         return grid    
    
@@ -1614,13 +1576,8 @@ def get_los_and_ol_multi_agent(node, board, radius, grid_comps, padding, los_typ
         if padding is not None:
             los_segments_mask = np.zeros((8,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
             los_segments = np.zeros((8,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
-            los_segments_debug = np.zeros((1,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
-
             overlap_segments_mask = np.zeros((8,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
             overlap_segments = np.zeros((8,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
-            overlap_segments_debug = np.zeros((1,int(x)+2*int(padding/r),int(y)+2*int(padding/r)), np.uint8)
-
-
         else:
             los_segments_mask = np.zeros((8,int(x),int(y)), np.uint8)
             los_segments = np.zeros((8,int(x),int(y)), np.uint8)
