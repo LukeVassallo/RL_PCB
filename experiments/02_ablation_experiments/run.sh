@@ -12,8 +12,9 @@ sleep 2
 
 cd ${RL_PCB}/src/training
 
-./scheduler.sh --run_config ${EXP_DIR}/run_config_a.txt --logfile $EXP_DIR/scheduler_a.log --instances 6 --yes 
-./scheduler.sh --run_config ${EXP_DIR}/run_config_b.txt --logfile $EXP_DIR/scheduler_b.log --instances 6 --yes 
+#./scheduler.sh --run_config ${EXP_DIR}/run_config_a.txt --logfile $EXP_DIR/scheduler_a.log --instances 6 --yes 
+#./scheduler.sh --run_config ${EXP_DIR}/run_config_b.txt --logfile $EXP_DIR/scheduler_b.log --instances 6 --yes 
+./scheduler.sh --run_config ${EXP_DIR}/run_config.txt --logfile $EXP_DIR/scheduler.log --instances 6 --yes 
 
 cd ${EXP_DIR}
 

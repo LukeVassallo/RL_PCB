@@ -3,7 +3,7 @@ from core.environment.parameters import parameters
 
 import numpy as np
 import torch
-import os
+import sys, os
 import datetime
 import random
 
@@ -247,6 +247,12 @@ def training_run(settings):
 
 def main():
     args,settings = cmdLine_args()
+
+    redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stdout")
+    sys.stdout = open(redirection_file, "w")
+
+    redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stderr")
+    sys.stderr = open(redirection_file, "w")
     
     program_info(args.device)
         

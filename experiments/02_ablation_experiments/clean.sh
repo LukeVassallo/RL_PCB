@@ -49,3 +49,11 @@ if [ -f "scheduler_b.log" ]; then
 else
     echo "Not found, therefore nothing to clean."
 fi
+
+echo -n "Attempting to clean the scheduler.log ... "
+if [ -f "scheduler.log" ]; then
+    echo "Found, deleting."
+    rm -fr scheduler.log 
+else
+    echo "Not found, therefore nothing to clean."
+fi
