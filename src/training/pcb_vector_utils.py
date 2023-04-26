@@ -165,6 +165,19 @@ def rectangular_to_polar(z):
 #     # print(dom)
 #     return dom, resultant_vecs, all_vecs
 
+def calculate_resultant_vector( x : float, y : float ):
+    euclidean_dist = np.sqrt(np.square(x) + np.square(y))
+
+    # if both x and y are zero, the result of delta_y/delta_x is NaN
+    if (x == y == 0.0):
+        angle = 0.0
+    else:
+        angle = np.arctan(y/x)
+
+    if (x < 0): angle += np.pi
+
+    return euclidean_dist, angle
+
 def compute_pad_referenced_distance_vectors_v2(n, nn, e, ignore_power=False):
     """
     
@@ -209,8 +222,7 @@ def compute_pad_referenced_distance_vectors_v2(n, nn, e, ignore_power=False):
             continue
         if ee.get_net_id() not in net_ids:
             net_ids.append(ee.get_net_id())
-            
-            
+                      
     # print(net_ids)
     pts = []
     for net_id in net_ids:
@@ -243,11 +255,8 @@ def compute_pad_referenced_distance_vectors_v2(n, nn, e, ignore_power=False):
                         
                         delta_y = (sy-dy)
                         delta_x = (dx-sx)
-                        
-                        euclidean_dist = np.sqrt(np.square(delta_x) + np.square(delta_y))
-                        angle = np.arctan(delta_y/delta_x)
-                        if (delta_x < 0): angle += np.pi
-                        
+
+                        euclidean_dist, angle = calculate_resultant_vector(delta_x, delta_y)
                         
                         # 2 Remove duplicates by taking the shorter ones
                         found = False
