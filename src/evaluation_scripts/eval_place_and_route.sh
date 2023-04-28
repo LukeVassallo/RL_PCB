@@ -135,8 +135,11 @@ for board in ${EVALUATION_DIR}/* ; do
             $BIN/${KICAD_PARSER} --kicad_pcb ${OUTPUT_DIR}/${KICAD_PCB} --pcb $pcb --update -o $OUTPUT_DIR --skip_kicad_pcb_validation &> /dev/null # skip .kicad_pcb name validation since the file is being renamed. Otherwise no parsing/updating will occur.
             $BIN/${SA_PLACER} --kicad_pcb $OUTPUT_DIR/$KICAD_PCB -i 500 --output_dir $OUTPUT_DIR --name $OUTPUT_DIR/$KICAD_PCB --logfile $OUTPUT_DIR/$LOGFILE --ignore_power_nets &> /dev/null
 #             $BIN/${SA_PLACER} --kicad_pcb $OUTPUT_DIR/$KICAD_PCB -i 500 --output_dir $OUTPUT_DIR --name $OUTPUT_DIR/$KICAD_PCB --logfile /dev/null &> /dev/null   # if logfile is omitted, one will be created having the same URI as the output file albeit with a .log extension
-
 #             $BIN/${SA_PLACER} --kicad_pcb $OUTPUT_DIR/$KICAD_PCB -i 500 --output_dir $OUTPUT_DIR --name $OUTPUT_DIR/$KICAD_PCB --logfile $OUTPUT_DIR/$LOGFILE --ignore_power_nets --print_cost_and_exit &> /dev/null
+
+            # Convert the optimised layout into a .pcb file and draw it as a .png image.
+            $BIN/${KICAD_PARSER} --kicad_pcb ${OUTPUT_DIR}/${KICAD_PCB} --generate_pcb --pcb ${OUTPUT_DIR}/${$NEW_FILENAME}_placed.pcb &> /dev/null # skip .kicad_pcb name validation since the file is being renamed. Otherwise no parsing/updating will occur.
+            python pcb2png.py --pcb_file ${OUTPUT_DIR}/${PLACED_PCB} --output ${OUTPUT_DIR}/${NEW_FILENAME}_placed.png
 
             $BIN/${PCB_ROUTER} --kicad_pcb $OUTPUT_DIR/$KICAD_PCB --output_dir $OUTPUT_DIR --name $OUTPUT_DIR/$ROUTED_FILENAME --logfile $OUTPUT_DIR/$LOGFILE --rip_up_reroute_iterations=0 --layer_change_cost=100 --ignore_power_nets &> /dev/null
             
