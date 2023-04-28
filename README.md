@@ -6,10 +6,18 @@
 
 # Installation Guide
 
-Install Pre-requisites
+## Install Pre-requisites
 
 ```
-sudo apt install python3-virtualenv build-essential libboost-dev libboost-filesystem-dev
+sudo apt install build-essential libboost-dev libboost-filesystem-dev
+```
+
+## Installation of python3.8
+All python code uses python version 3.8. Additionally python virtual envrionments are needed to install dependencies in a contained environment without altering the system configuration. 
+```
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt install python3.8 python3.8-venv
 ```
 
 ## GPU Setup
@@ -25,12 +33,12 @@ To install the driver, you can start by issuing the command `ubuntu-drivers` dev
 
 ### Download and install CUDA toolkit
 
-To ensure that your device driver is compatible with CUDA, you'll need to check the compatibility using the following link: https://docs.nvidia.com/deploy/cuda-compatibility/. Once you've confirmed the compatibility, you can proceed to the CUDA Toolkit Archive at https://developer.nvidia.com/cuda-toolkit-archive. From there, select version 11.7 and then choose the appropriate platform parameters from the "Select Target Platform" section. Next, download the runfile (local) and proceed with the installation process. Keep in mind that CUDA 11.7 is supported for the GTX1080 with driver version 525.89.02. Finally, make sure to follow the installation instructions carefully and avoid installing the driver when prompted.
+To ensure that your device driver is compatible with CUDA, you'll need to check the compatibility using the following link: https://docs.nvidia.com/deploy/cuda-compatibility/. Once you've confirmed the compatibility, you can proceed to the CUDA Toolkit Archive at https://developer.nvidia.com/cuda-toolkit-archive. From there, select version 11.7 and then choose the appropriate platform parameters from the "Select Target Platform" section. Next, download the runfile (local) and proceed with the installation process. Finally, make sure to follow the installation instructions carefully and avoid installing the driver when prompted.
 
 ```
 wget https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda_11.7.1_515.65.01_linux.run
 sudo sh cuda_11.7.1_515.65.01_linux.run
-```
+``
 
 Update the setup.sh script as necessary. The default contents for `PATH` and `LD_LIBRARY_PATH` are:
 
@@ -65,8 +73,6 @@ python -m pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==
 
 python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna tensorboard reportlab py-cpuinfo psutil pandas seaborn pynvml plotly moviepy
 
-python -m pip install traceback-with-variables
-
 python -m pip install -U kaleido
 
 python -m pip install ./lib/pcb_netlist_graph-0.0.1-py3-none-any.whl
@@ -74,11 +80,3 @@ python -m pip install ./lib/pcb_file_io-0.0.1-py3-none-any.whl
 ```
 
 The `setup.sh` script is already setup to activate the virtual environment. No further configuration is necessary.
-
-## Installation of python3.8
-
-```
-sudo add-apt-repository ppa:deadsnakes/ppa -y
-sudo apt update
-sudo apt install python3.8
-```
