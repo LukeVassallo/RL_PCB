@@ -1,6 +1,6 @@
 #!/bin/bash
 
-date="2022/11/09"
+date="2023/04/28"
 
 kicadParser_branch=parsing_and_plotting
 SA_PCB_branch=crtYrd_bbox
