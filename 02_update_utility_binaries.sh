@@ -2,13 +2,13 @@
 
 date="2022/11/09"
 
-KicadParser_branch=parsing_and_plotting
+kicadParser_branch=parsing_and_plotting
 SA_PCB_branch=crtYrd_bbox
 pcbRouter_branch=updating_dependencies
 
-#GIT=https://www.github.com
+#GIT=https://www.github.com/
 #GIT_USER=lukevassallo
-GIT=https://gitlab.lukevassallo.com
+GIT=git@gitlab.lukevassallo.com:
 GIT_USER=luke
 
 printf "\n"
@@ -18,53 +18,61 @@ printf "    ** Last modification time %s\n" $date
 printf "\n"
 sleep 1
 
-cd bin
+if [ -d "bin" ]; then
+	cd bin
+else
+	mkdir bin && cd bin
+fi
+
 echo -n "Building kicad pcb parsing utility. Checking for repository ... "
+ORIGIN=${GIT}${GIT_USER}/kicadParser
 if [ -d "KicadParser" ]; then
 	echo "Found, cleaning"
 	cd KicadParser
 	make clean
-    git pull origin ${KicadParser_branch}
+    	git pull $ORIGIN ${kicadParser_branch}
     #git submodule update --remote --recursive
 else
 	echo "Not found, cloning."
-	git clone --branch ${KicadParser_branch} ${GIT}/${GIT_USER}/KicadParser --recurse-submodules
+	git clone --branch ${kicadParser_branch} ${ORIGIN} --recurse-submodules KicadParser
 	cd KicadParser
 fi 	
-make -j8
+make -j$(nproc)
 cp -v build/kicadParser_test ../kicadParser
 cd ..
 
 echo -n "Building simulated annealing pcb placer. Checking for repository ... "
+ORIGIN=${GIT}${GIT_USER}/SA_PCB
 if [ -d "SA_PCB" ]; then
 	echo "Found, cleaning"
 	cd SA_PCB
 	make clean
-    git pull origin ${SA_PCB_branch}
+	git pull ${ORIGIN} ${SA_PCB_branch}
     #git submodule update --remote --recursive
 else
 	echo "Not found, cloning."
-	git clone --branch ${SA_PCB_branch} ${GIT}/${GIT_USER}/SA_PCB --recurse-submodules
+	git clone --branch ${SA_PCB_branch} ${ORIGIN} --recurse-submodules
 	cd SA_PCB
 fi 	
-make -j8
+make -j$(nproc)
 #cp -v ./build/sa_placer_test ../bin/sa_placer
 cp -v ./build/sa_placer_test ../sa
 cd ..
 
 echo -n "Building pcbRouter binary. Checking for repository ... "
+ORIGIN=${GIT}${GIT_USER}/pcbRouter
 if [ -d "pcbRouter" ]; then
 	echo "Found, cleaning"
 	cd pcbRouter
 	make clean
-    git pull origin ${pcbRouter_branch}
+    	git pull ${ORIGIN} ${pcbRouter_branch}
     #git submodule update --remote --recursive
 else
 	echo "Not found, cloning."
-	git clone --branch ${pcbRouter_branch} ${GIT}/${GIT_USER}/pcbRouter --recurse-submodules
+	git clone --branch ${pcbRouter_branch} ${ORIGIN} --recurse-submodules
 	cd pcbRouter
 fi 	
-make -j8
+make -j$(nproc)
 cp -v build/pcbRouter_test ../pcb_router
 cd ..
 
