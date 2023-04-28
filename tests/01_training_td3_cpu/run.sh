@@ -5,6 +5,8 @@ export TEST_DIR=${TEST_DIR}
 echo "Script launched from ${TEST_DIR}"
 echo "RL_PCB repository root is ${RL_PCB}"
 
+mkdir -p work
+
 cd ${RL_PCB}/src/training
 ./scheduler.sh --run_config ${TEST_DIR}/run_config.txt --logfile $TEST_DIR/scheduler.log --instances 4 --yes 
 cd ${TEST_DIR}
