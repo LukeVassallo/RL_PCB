@@ -142,6 +142,11 @@ for board in ${EVALUATION_DIR}/* ; do
             PLACED_PNG=${NEW_FILENAME}_placed.png
             $BIN/${KICAD_PARSER} --kicad_pcb ${OUTPUT_DIR}/${KICAD_PCB} --generate_pcb --pcb ${OUTPUT_DIR}/${PLACED_PCB} &> /dev/null # skip .kicad_pcb name validation since the file is being renamed. Otherwise no parsing/updating will occur.
             python pcb2png.py --pcb ${OUTPUT_DIR}/${PLACED_PCB} --output ${OUTPUT_DIR}/${PLACED_PNG}
+            
+            # Remove temporary files generated during the creation of .pcb file.
+            if [ -d "tmp" ]; then
+            	rm -fr tmp
+            fi
 
             $BIN/${PCB_ROUTER} --kicad_pcb $OUTPUT_DIR/$KICAD_PCB --output_dir $OUTPUT_DIR --name $OUTPUT_DIR/$ROUTED_FILENAME --logfile $OUTPUT_DIR/$LOGFILE --rip_up_reroute_iterations=0 --layer_change_cost=100 --ignore_power_nets &> /dev/null
             

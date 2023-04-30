@@ -767,7 +767,7 @@ def draw_ratsnest(current_node, neighbor_nodes, e, bx, by, line_thickness=1, pad
                                     ])
                         break;
                         
-    for i in range(len(src)):
+    for i in range(min(len(src),len(dst))):
         if padding is not None:
             sx = int(src[i][0]/r) + int(padding/r)
             sy = int(src[i][1]/r) + int(padding/r)
