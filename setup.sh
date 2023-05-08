@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUDA=11.7
+CUDA_VERSION=11.7
 
 # Setup repository environment variable
 RL_PCB=${PWD}
@@ -8,9 +8,9 @@ export RL_PCB
 echo "RL_PCB=${RL_PCB}"
 
 # Make CUDA available
-if [ -d "/usr/local/cuda-${CUDA}" ]; then
-	export PATH="/usr/local/cuda-11.7/bin:$PATH"
-	export LD_LIBRARY_PATH="/usr/local/cuda-11.7/lib64:$LD_LIBRARY_PATH"
+if [ -d "/usr/local/cuda-${CUDA_VERSION}" ]; then
+	export PATH="/usr/local/cuda-${CUDA_VERSION}/bin:$PATH"
+	export LD_LIBRARY_PATH="/usr/local/cuda-${CUDA_VERSION}/lib64:$LD_LIBRARY_PATH"
 else
 	echo "Could not find ${CUDA} on system."
 fi
