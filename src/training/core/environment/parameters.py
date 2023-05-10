@@ -22,7 +22,7 @@ class parameters:
         self.seed = parameters["seed"]
         self.ignore_power = parameters["ignore_power"]
         self.log_dir = parameters["log_dir"]
-        self.idx = parameters["idx"]
+        self.idx = parameters["idx"]                # TODO: Add error checking
         self.shuffle_idxs = parameters["shuffle_idxs"]
     def write_to_file(self, fileName, append=True):
         return

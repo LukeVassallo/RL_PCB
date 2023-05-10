@@ -219,7 +219,7 @@ def training_run(settings):
                            "seed": settings['seed'][settings["run"]],
                            "ignore_power": True,
                            "log_dir": settings['log_dir'],
-                           "idx": None,
+                           "idx": settings['pcb_idx'],
                            "shuffle_idxs": settings['shuffle_training_idxs'],
                            })
     
@@ -248,11 +248,13 @@ def training_run(settings):
 def main():
     args,settings = cmdLine_args()
 
-    redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stdout")
-    sys.stdout = open(redirection_file, "w")
+    if settings["redirect_stdout"] is True:
+        redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stdout")
+        sys.stdout = open(redirection_file, "w")
 
-    redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stderr")
-    sys.stderr = open(redirection_file, "w")
+    if settings["redirect_stderr"] is True:
+        redirection_file = os.path.join(settings['tensorboard_dir'],f"{settings['policy']}_{settings['experiment']}.stderr")
+        sys.stderr = open(redirection_file, "w")
     
     program_info(args.device)
         

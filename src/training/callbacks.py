@@ -95,6 +95,7 @@ class log_and_eval_callback():
             mean_episode_length = np.int32(np.round(np.mean(self.model.trackr.episode_length),0))
             episode_reward = np.round(self.model.trackr.episode_reward[-1],2)
             mean_episode_reward = np.round(np.mean(self.model.trackr.episode_reward),2)
+            fps = np.round(self.model.trackr.episode_fps[-1],2)
             mean_fps = np.round(np.mean(self.model.trackr.episode_fps),2)
             
             if episode_reward > self.best_episode_reward:
@@ -134,7 +135,7 @@ class log_and_eval_callback():
                 self.training_log.write(f'{self.model.episode_num},{self.model.num_timesteps},{episode_length},{np.round(self.model.trackr.episode_reward[-1],6)}\r\n')
                     
             if self.verbose:
-                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | {self.model.num_timesteps} | {episode_length}/{mean_episode_length} | {episode_reward}/{mean_episode_reward} | {mean_fps}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | {self.model.num_timesteps} | {episode_length}/{mean_episode_length} | {episode_reward}/{mean_episode_reward} | {fps}/{mean_fps}')
 
         if self.model.num_timesteps % self.eval_freq == 0:
             info = self.evaluate(model=None, tag=f'periodic_evals/training_dataset/{int(self.model.num_timesteps/1000)}k', training_dataset=True, quick_eval=True)

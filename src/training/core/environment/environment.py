@@ -1,4 +1,4 @@
-import os
+import os, sys
 from data_augmenter import dataAugmenter
 import pcb.pcb as pcb
 import graph.graph as graph     # Necessary for graph related methods
@@ -18,6 +18,11 @@ class environment:
 
         self.pv = pcb.vptr_pcbs()
         pcb.read_pcb_file(self.parameters.pcb_file, self.pv)      # Read pcb file
+
+        if (self.parameters.idx != -1) and (self.parameters.idx >= len(self.pv)):
+            print("The supplied pcb index exceeds the number of layouts in the training set ... Program terminating")
+            sys.exit()
+
         self.rng = np.random.default_rng(seed=self.parameters.seed)
         self.initialize_environment_state_from_pcb(init=True, idx=self.parameters.idx)   # sets p,g and b variables; idx=None => random!!
         self.tracker = tracker()
@@ -49,8 +54,7 @@ class environment:
 
     def reset(self):        
         self.g.update_original_nodes_with_current_optimals()
-        self.initialize_environment_state_from_pcb(init=True, idx=self.parameters.idx)   # sets p,g and b variables; idx=None => random!!; set to True for multiple PCBs
-        #self.initialize_environment_state_from_pcb()
+        self.initialize_environment_state_from_pcb(init=True, idx=self.parameters.idx)   # sets p,g and b variables; idx=-1 => random!!; set to True for multiple PCBs
         
         if self.parameters.use_dataAugmenter == True:
             # The following configures the maximum translation. The following constraints / requirements apply:
@@ -148,8 +152,8 @@ class environment:
         self.tracker.add_metrics(step_metrics)
         return observation_vec   
 
-    def initialize_environment_state_from_pcb(self, init = False, idx=None):
-        if idx==None:
+    def initialize_environment_state_from_pcb(self, init = False, idx=-1):
+        if idx==-1:
             self.idx = int(self.rng.integers(len(self.pv)))
         else:
             self.idx = idx

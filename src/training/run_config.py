@@ -42,6 +42,10 @@ def cmdLine_args():
     parser.add_argument("--early_stopping", required=False, type=int, default=None, help="If no improvement occurs after <early_stopping> steps, then learning will terminate early. Mean episode reward computed over the last 100 episodes is used for comparision")
     parser.add_argument("--shuffle_training_idxs", required=False, action="store_true", default=False, help="shuffle agent idxs during training")
     parser.add_argument("--shuffle_evaluation_idxs", required=False, action="store_true", default=False, help="shuffle agent idxs during evaluation")
+    parser.add_argument("--pcb_idx", required=False, default=-1, type=int, help="When supplied the particular pcb is used for training")
+    parser.add_argument("--redirect_stdout", required=False, action="store_true", default=False, help="redirect standard output to file")
+    parser.add_argument("--redirect_stderr", required=False, action="store_true", default=False, help="redirect standard error to file")
+
 
     args = parser.parse_args()
     
@@ -82,6 +86,9 @@ def cmdLine_args():
         settings["early_stopping"] = args.early_stopping
     settings["shuffle_training_idxs"] = args.shuffle_training_idxs
     settings["shuffle_evaluation_idxs"] = args.shuffle_evaluation_idxs
+    settings["pcb_idx"] = args.pcb_idx
+    settings["redirect_stdout"] = args.redirect_stdout
+    settings["redirect_stderr"] = args.redirect_stderr
 
     return args, settings
 
