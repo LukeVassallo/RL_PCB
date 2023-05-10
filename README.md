@@ -19,7 +19,6 @@ Main contribution of this work
 sudo apt install build-essential libboost-dev libboost-filesystem-dev
 ```
 
-## Installation of python3.8
 All python code uses python version 3.8. Additionally python virtual envrionments are needed to install dependencies in a contained environment without altering the system configuration. 
 ```
 sudo add-apt-repository ppa:deadsnakes/ppa -y
@@ -58,7 +57,7 @@ cd tests/01_training_td3_cpu
 
 The script `run.sh` will perform the following: 
 1. Carry out the training run(s) by following the instructions in `run_config.txt` that is located within the same directory
-2. Generates an experiment report that processes the experimental data and presents the results in tables and figures. All experiment metadata is also reported.
+2. Generates an experiment report that processes the experimental data and presents the results in tables and figures. All experiment metadata is also reported and customisation is possible through `report_config.py` that is location within the same directory.
 3. Perform evaluation of all policies alongside simulated annealing baseline. All optimised placed are subsequently routed. 
 4. Generate and evaluation report that processes all evaluation data and tabulates HPWL and routed wirelength metrics. All experiment metadata is also reported.
 
