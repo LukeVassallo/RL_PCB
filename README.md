@@ -4,10 +4,17 @@
         - [Download and install CUDA toolkit](#download-and-install-cuda-toolkit)
     - [Setup Virtual Envrionment](#setup-virtual-envrionment)
 
+RL\_PCB is a novel learning based method for optimising the placement of circuit comoponents on a Printed Circuit Board (PCB). 
+
+Main contribution of this work
+1. The policies learn the fundamental rules of the task and demonstrate an understanding of the problem dynamics. The agent is observed taking actions that **in the long term** minimise overlap-free wirelength, while the components naturally fall in place resulting in a coherent layout. 
+2. Since the agent represents a component, emergent behaviours are observered as a result of each component interacting with its neighbours. When we emphase HPWL in the reward function we observe collaboration, on ther other hand when we emphasise EW we observe competition. 
+3. The learned behaviour is robust because training data is diverse and consistent with the evaluative feedback assigned. Consistency is achieved by exensive normalisation and eliminating all potential sources that introduce bias. Similarly goes for the reward. Diversity is obtained by allowing every agent to contribute to training samples with diffferent perspectives. 
+
 # Installation Guide
+**It is very important that the installation procedure is carried out while being in the root of the repository (i.e. the same location as the script install_tools_and_virtual_environment.sh)**
 
 ## Install Pre-requisites
-
 ```
 sudo apt install build-essential libboost-dev libboost-filesystem-dev
 ```
@@ -20,7 +27,50 @@ sudo apt update
 sudo apt install python3.8 python3.8-venv
 ```
 
-## GPU Setup
+## Run automated installation script
+The automated installation procedure makes the following changes to the local repository:
+- Create a directory bin and installs the KiCad parsing utility, and place and route tools
+- Creates a environment using python3.8, installs pytorch 1.13 with CUDA 11.7 and all necessary python packages
+- Installs the wheel libraries in the lib folder
+
+```
+./install_tools_and_virtual_environment.sh
+```
+
+# Run tests and experiments
+Always source the envrionment setup script before running any tests or experiments. **The script should be run from the root of the repository**
+```
+cd <path-to-rl_pcb>
+source setup.sh 
+```
+
+Run an experiment
+```
+cd experiments/00_parameter_exeperiments
+./run.sh 	
+```
+
+Run a test
+```
+cd tests/01_training_td3_cpu
+./run.sh
+```
+
+The script `run.sh` will perform the following: 
+1. Carry out the training run(s) by following the instructions in `run_config.txt` that is located within the same directory
+2. Generates an experiment report that processes the experimental data and presents the results in tables and figures. All experiment metadata is also reported.
+3. Perform evaluation of all policies alongside simulated annealing baseline. All optimised placed are subsequently routed. 
+4. Generate and evaluation report that processes all evaluation data and tabulates HPWL and routed wirelength metrics. All experiment metadata is also reported.
+
+The generated files can be cleaned by running
+```
+./clean.sh
+```
+
+Every test and experiment contains a directory `expected results` that contains pre-generated reports. Should you run the experiments as provided, identical results are to be expected.
+
+# GPU Setup (Optional)
+**The commands in this section do big changes to your system. Please read carefully before running commands**
 
 1.  Check Nvidia compatability list
 2.  Remove CUDA if instealled `sudo apt-get --purge remove cuda* *cublas* *cufft* *curand* *cusolver* *cusparse* *npp* *nvjpeg* *nsight*`
@@ -32,7 +82,6 @@ sudo apt install python3.8 python3.8-venv
 To install the driver, you can start by issuing the command `ubuntu-drivers` devices and identifying the latest third party non-free version. Once you have identified the appropriate version, use `apt` to install the driver. After installing the driver, reboot your system and issue the command `nvidia-smi` to identify the full driver version. You will need this information in the upcoming section to determine which CUDA version is supported.
 
 ### Download and install CUDA toolkit
-
 To ensure that your device driver is compatible with CUDA, you'll need to check the compatibility using the following link: https://docs.nvidia.com/deploy/cuda-compatibility/. Once you've confirmed the compatibility, you can proceed to the CUDA Toolkit Archive at https://developer.nvidia.com/cuda-toolkit-archive. From there, select version 11.7 and then choose the appropriate platform parameters from the "Select Target Platform" section. Next, download the runfile (local) and proceed with the installation process. Finally, make sure to follow the installation instructions carefully and avoid installing the driver when prompted.
 
 ```
