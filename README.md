@@ -13,13 +13,11 @@ Main contribution of this work
 2. Since the agent represents a component, emergent behaviours are observered as a result of each component interacting with its neighbours. When we emphase HPWL in the reward function we observe collaboration, on ther other hand when we emphasise EW we observe competition. 
 3. The learned behaviour is robust because training data is diverse and consistent with the evaluative feedback assigned. Consistency is achieved by exensive normalisation and eliminating all potential sources that introduce bias. Similarly goes for the reward. Diversity is obtained by allowing every agent to contribute to training samples with diffferent perspectives. 
 
-<center>
 |     |     |     |
 | --- | --- | --- |
 | ![055_15.gif](.figs/055_15.gif) <br /> (EW=0, HPWL=5, Overlap=5) | ![055_15.gif](.figs/802_14.gif) <br /> (EW=8, HPWL=0, Overlap=2) | ![055_15.gif](.figs/082_14.gif) <br /> (EW=0, HPWL=8, Overlap=2)     |
 | ![policy.gif](.figs/policy.gif) <br /> (EW=0, HPWL=8, Overlap=2)  | ![policy_802_td3.gif](.figs/policy_802_td3.gif) <br /> (EW=8, HPWL=0, Overlap=2)| ![policy_802_sac.gif](.figs/policy_802_sac.gif) <br /> (EW=8, HPWL=0, Overlap=2)|
 | ![policy_802_sac_b.gif](.figs/policy_802_sac_b.gif) <br /> (EW=8, HPWL=0, Overlap=2)  | ![policy_sac_226.gif](.figs/policy_sac_226.gif) <br /> (EW=2, HPWL=2, Overlap=6) | ![policy_td3_226.gif](.figs/policy_td3_226.gif)  <br /> (EW=2, HPWL=2, Overlap=6)   |
-</center>
 
 # Installation Guide
 **It is very important that the installation procedure is carried out while being in the root of the repository (i.e. the same location as the script install_tools_and_virtual_environment.sh)**
