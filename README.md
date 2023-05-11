@@ -13,7 +13,7 @@ Main contribution of this work
 
 |     |     |     |
 | --- | --- | --- |
-| ![policy.gif](:./.figs/policy) policy| ![policy _802_td3.gif](:./.figs/policy _802_td3.gif) policy_802_td3| ![policy_802_sac.gif](:.figs/policy_802_sac.gif) policy_802_sac|
+| ![policy.gif](./.figs/policy) policy| ![policy _802_td3.gif](.figs/policy _802_td3.gif) policy_802_td3| ![policy_802_sac.gif](:.figs/policy_802_sac.gif) policy_802_sac|
 | ![policy_802_sac_b.gif](:./.figs/) |     |     |
 | ![055_15.gif](:./.figs/055_15.gif) policy_055 | ![055_15.gif](:./.figs/802_14.gif) policy_802     | ![055_15.gif](:./.figs/082_14.gif) policy_082     |
 # Installation Guide
