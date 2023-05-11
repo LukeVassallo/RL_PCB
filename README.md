@@ -13,9 +13,9 @@ Main contribution of this work
 
 |     |     |     |
 | --- | --- | --- |
-| ![055_15.gif](.figs/055_15.gif) <br /> policy_055 | ![055_15.gif](.figs/802_14.gif) <br /> policy_802     | ![055_15.gif](.figs/082_14.gif) <br /> policy_082     |
-| ![policy.gif](.figs/policy.gif) <br /> policy| ![policy_802_td3.gif](.figs/policy_802_td3.gif) <br /> policy_802_td3| ![policy_802_sac.gif](.figs/policy_802_sac.gif) <br /> policy_802_sac|
-| ![policy_802_sac_b.gif](.figs/policy_802_sac_b.gif) <br /> policy_802_sac | ![policy_sac_226.gif](.figs/policy_sac_226.gif) <br /> policy_sac_226.gif| ![policy_td3_226.gif](.figs/policy_td3_226.gif)  <br /> policy_td3_226.gif  |
+| ![055_15.gif](.figs/055_15.gif) <br /> (EW=0, HPWL=5, Overlap=5) | ![055_15.gif](.figs/802_14.gif) <br /> (EW=8, HPWL=0, Overlap=2) | ![055_15.gif](.figs/082_14.gif) <br /> (EW=0, HPWL=8, Overlap=2)     |
+| ![policy.gif](.figs/policy.gif) <br /> (EW=0, HPWL=8, Overlap=2)  | ![policy_802_td3.gif](.figs/policy_802_td3.gif) <br /> (EW=8, HPWL=0, Overlap=2)| ![policy_802_sac.gif](.figs/policy_802_sac.gif) <br /> (EW=8, HPWL=0, Overlap=2)|
+| ![policy_802_sac_b.gif](.figs/policy_802_sac_b.gif) <br /> (EW=8, HPWL=0, Overlap=2)  | ![policy_sac_226.gif](.figs/policy_sac_226.gif) <br /> (EW=2, HPWL=2, Overlap=6) | ![policy_td3_226.gif](.figs/policy_td3_226.gif)  <br /> (EW=2, HPWL=2, Overlap=6)   |
 # Installation Guide
 **It is very important that the installation procedure is carried out while being in the root of the repository (i.e. the same location as the script install_tools_and_virtual_environment.sh)**
 
