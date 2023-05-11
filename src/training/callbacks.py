@@ -374,7 +374,7 @@ class log_and_eval_callback():
                 print(f'eval_env episode {i} performed {episode_steps} in environment.')
             eval_env.tracker.create_video(fileName=os.path.join(run_output_dir, f'{i}.mp4'), display_metrics=False)
             vids = eval_env.tracker.video_tensor()
-            self.log_video(vids=vids, tag=video_tag, global_step=i)   
+            # self.log_video(vids=vids, tag=video_tag, global_step=i)   
 
             #eval_env.tracker.create_plot(fileName=os.path.join(video_path, f'{i}.png'))
             eval_env.tracker.log_run_to_file(path=run_output_dir, filename=f'{i}.log', kicad_pcb=eval_env.g.get_kicad_pcb_file())  

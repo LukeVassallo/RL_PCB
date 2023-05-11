@@ -183,6 +183,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+source setup.sh
+
 if [ "$UPDATE_UTILITY_BINARIES" == true ]; then
 	update_utility_binaries --clean_before_build --run_placer_tests --run_router_tests
 fi
@@ -218,7 +220,7 @@ else
 	python -m pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
 fi
 
-python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna tensorboard reportlab py-cpuinfo psutil pandas seaborn pynvml plotly moviepy
+python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna tensorboard reportlab==3.6.13 py-cpuinfo psutil pandas seaborn pynvml plotly moviepy
 
 python -m pip install -U kaleido
 
