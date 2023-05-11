@@ -13,8 +13,8 @@ Main contribution of this work
 
 |     |     |     |
 | --- | --- | --- |
-| ![055_15.gif](.figs/055_15.gif) <br /> policy_055 | ![055_15.gif](.figs/802_14.gif) <br /> policy_802     | ![055_15.gif](.figs/082_14.gif) <br /> <br /> policy_082     |
-| ![policy.gif](.figs/policy) <br /> policy| ![policy_802_td3.gif](.figs/policy_802_td3.gif) <br /> policy_802_td3| ![policy_802_sac.gif](.figs/policy_802_sac.gif) <br /> policy_802_sac|
+| ![055_15.gif](.figs/055_15.gif) <br /> policy_055 | ![055_15.gif](.figs/802_14.gif) <br /> policy_802     | ![055_15.gif](.figs/082_14.gif) <br /> policy_082     |
+| ![policy.gif](.figs/policy.gif) <br /> policy| ![policy_802_td3.gif](.figs/policy_802_td3.gif) <br /> policy_802_td3| ![policy_802_sac.gif](.figs/policy_802_sac.gif) <br /> policy_802_sac|
 | ![policy_802_sac_b.gif](.figs/policy_802_sac_b.gif) <br /> policy_802_sac | ![policy_sac_226.gif](.figs/policy_sac_226.gif) <br /> policy_sac_226.gif| ![policy_td3_226.gif](.figs/policy_td3_226.gif)  <br /> policy_td3_226.gif  |
 # Installation Guide
 **It is very important that the installation procedure is carried out while being in the root of the repository (i.e. the same location as the script install_tools_and_virtual_environment.sh)**
