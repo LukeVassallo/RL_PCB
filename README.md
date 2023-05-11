@@ -11,6 +11,11 @@ Main contribution of this work
 2. Since the agent represents a component, emergent behaviours are observered as a result of each component interacting with its neighbours. When we emphase HPWL in the reward function we observe collaboration, on ther other hand when we emphasise EW we observe competition. 
 3. The learned behaviour is robust because training data is diverse and consistent with the evaluative feedback assigned. Consistency is achieved by exensive normalisation and eliminating all potential sources that introduce bias. Similarly goes for the reward. Diversity is obtained by allowing every agent to contribute to training samples with diffferent perspectives. 
 
+|     |     |     |
+| --- | --- | --- |
+| ![policy.gif](:./.figs/policy) policy| ![policy _802_td3.gif](:./.figs/policy _802_td3.gif) policy_802_td3| ![policy_802_sac.gif](:.figs/policy_802_sac.gif) policy_802_sac|
+| ![policy_802_sac_b.gif](:./.figs/) |     |     |
+| ![055_15.gif](:./.figs/055_15.gif) policy_055 | ![055_15.gif](:./.figs/802_14.gif) policy_802     | ![055_15.gif](:./.figs/082_14.gif) policy_082     |
 # Installation Guide
 **It is very important that the installation procedure is carried out while being in the root of the repository (i.e. the same location as the script install_tools_and_virtual_environment.sh)**
 
@@ -58,7 +63,7 @@ cd tests/01_training_td3_cpu
 The script `run.sh` will perform the following: 
 1. Carry out the training run(s) by following the instructions in `run_config.txt` that is located within the same directory
 2. Generates an experiment report that processes the experimental data and presents the results in tables and figures. All experiment metadata is also reported and customisation is possible through `report_config.py` that is location within the same directory.
-3. Perform evaluation of all policies alongside simulated annealing baseline. All optimised placed are subsequently routed. 
+3. Perform evaluation of all policies alongside simulated annealing baseline. All optimised placements are subsequently routed using an A\* based algorithm. 
 4. Generate and evaluation report that processes all evaluation data and tabulates HPWL and routed wirelength metrics. All experiment metadata is also reported.
 
 The generated files can be cleaned by running
