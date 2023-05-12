@@ -88,7 +88,7 @@ system-test-cpu:   # This job runs in the test stage.
   script:
     - source setup.sh
     - echo ${RL_PCB}
-    - cd ${RL_PCB}/tests/06_training_td3_cuda_fast/
+    - cd ${RL_PCB}/tests/06_training_td3_cpu_fast/
     - ./run.sh
 
 lint-test-job:   # This job also runs in the test stage.
