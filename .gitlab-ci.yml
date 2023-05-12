@@ -22,6 +22,7 @@ stages:          # List of stages for jobs, and their order of execution
   - deploy
 
 before_script:
+  - mkdir bin # intentionally inserted to skip cloning of private repos
   - ./install_tools_and_virtual_environment.sh 
 
 after_script:
