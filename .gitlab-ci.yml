@@ -57,7 +57,7 @@ unit-test-job:   # This job runs in the test stage.
     - sleep 10
     - echo "Code coverage is 90%"
 
-system-test-job:   # This job runs in the test stage.
+system-test-gpu:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - general-purpose, gpu-enabled 
@@ -72,6 +72,23 @@ system-test-job:   # This job runs in the test stage.
     - source setup.sh
     - echo ${RL_PCB}
     - cd ${RL_PCB}/tests/05_training_td3_cuda_fast/
+    - ./run.sh
+
+system-test-cpu:   # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
+  tags:
+    - general-purpose, gpu-enabled
+  before_script:
+    - echo "Running local before_script"
+    - mkdir -p bin # intentionally inserted to skip cloning of private repos
+    - ./install_tools_and_virtual_environment.sh --cpu_only
+  variables:
+    GIT_STRATEGY: fetch
+  timeout: 12h 0m
+  script:
+    - source setup.sh
+    - echo ${RL_PCB}
+    - cd ${RL_PCB}/tests/06_training_td3_cuda_fast/
     - ./run.sh
 
 lint-test-job:   # This job also runs in the test stage.
