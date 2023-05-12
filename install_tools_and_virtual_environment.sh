@@ -224,7 +224,7 @@ python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna t
 
 python -m pip install -U kaleido
 
-python -m pip install ./lib/pcb_netlist_graph-0.0.1-py3-none-any.whl
-python -m pip install ./lib/pcb_file_io-0.0.1-py3-none-any.whl
+python -m pip install ${RL_PCB}/lib/pcb_netlist_graph-0.0.1-py3-none-any.whl
+python -m pip install ${RL_PCB}/lib/pcb_file_io-0.0.1-py3-none-any.whl
 
-python tests/00_verify_machine_setup/test_setup.py
+python ${RL_PCB}/tests/00_verify_machine_setup/test_setup.py
