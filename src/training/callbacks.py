@@ -239,7 +239,7 @@ class log_and_eval_callback():
         params.shuffle_idxs = self.shuffle_evaluation_idxs
         params.seed = 3142
         params.log_dir = None                                   # Suppress logging of better expert paramater encounters
-        params.pcb_idx = -1                                     # Evaluate on all evaluation layouts. In other words pcb_idx effects on the training dataset.
+        params.idx = -1                                     # Evaluate on all evaluation layouts. In other words pcb_idx effects on the training dataset.
         if long == True:
             params.max_steps *= 3
             
