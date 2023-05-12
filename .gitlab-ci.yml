@@ -22,6 +22,7 @@ stages:          # List of stages for jobs, and their order of execution
   - deploy
 
 before_script:
+  - echo "Running global before_script"
   - mkdir -p bin # intentionally inserted to skip cloning of private repos
   - ./install_tools_and_virtual_environment.sh 
 
@@ -60,8 +61,13 @@ system-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - general-purpose, gpu-enabled 
+  before_script:
+    - echo "Running local before_script"
+    - mkdir -p bin # intentionally inserted to skip cloning of private repos
+    - ./install_tools_and_virtual_environment.sh
   variables:
-    GIT_STRATEGY: fetch     
+    GIT_STRATEGY: fetch
+  timeout: 12h 0m
   script:
     - source setup.sh
     - echo ${RL_PCB}
