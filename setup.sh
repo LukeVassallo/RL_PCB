@@ -19,9 +19,9 @@ echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
 echo "PATH=${PATH}"
 
 # Activate virtual environment
-echo -n "Attempting to activate virtual environment ... "
-if [ -d "venv" ]; then
-	source venv/bin/activate	# True virutal environment
+echo -n "Attempting to activate virtual environment ${RL_PCB}/venv ... "
+if [ -d "${RL_PCB}/venv" ]; then
+	source ${RL_PCB}/venv/bin/activate	# True virutal environment
 	echo "OK"
 else
 	echo "Failed, venv does not exist."
