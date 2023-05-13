@@ -73,6 +73,10 @@ system-test-gpu:   # This job runs in the test stage.
     - echo ${RL_PCB}
     - cd ${RL_PCB}/tests/05_training_td3_cuda_fast/
     - ./run.sh
+  artifacts:
+    paths:
+      - ./work
+      - ./experiment_report.pdf
 
 system-test-cpu:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
@@ -90,7 +94,11 @@ system-test-cpu:   # This job runs in the test stage.
     - echo ${RL_PCB}
     - cd ${RL_PCB}/tests/06_training_td3_cpu_fast/
     - ./run.sh
-
+  artifacts:
+    paths:
+      - ./work
+      - ./experiment_report.pdf
+      
 lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).
   tags:
