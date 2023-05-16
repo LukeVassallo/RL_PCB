@@ -15,7 +15,7 @@ def load_report_config(filename):
     return report_config    
         
 charts = {
-    '05_training_td3_cuda_fast_262': {  'experiments':['training_td3_cuda_262'],
+    '05_training_td3_cuda_fast_262': {  'experiments':['training_td3_cpu_262'],
                                             'algorithms': ['TD3'],
                                             'multi_agent': True,
                                             'window': 100,
