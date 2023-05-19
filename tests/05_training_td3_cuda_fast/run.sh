@@ -17,10 +17,10 @@ cd ${RL_PCB}/src/report_generation
 python generate_experiment_report.py --dir ${TEST_DIR}/work --hyperparameters ${TEST_DIR}/hyperparameters/hp_td3.json --report_config ${TEST_DIR}/report_config.json --output ${TEST_DIR}/experiment_report.pdf -y --tmp_dir ${TEST_DIR}/tmp
 cd ${TEST_DIR}
 
-#cd ${RL_PCB}/src/evaluation_scripts
-#TD3_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
-#SAC_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
+cd ${RL_PCB}/src/evaluation_scripts
+TD3_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
+SAC_EVAL_TESTING_DIR=${TEST_DIR}/work/eval_testing_set
 
-#./eval_just_do_it.sh -p ${RL_PCB}/dataset/base/evaluation.pcb -b ${RL_PCB}/dataset/base_raw --bin_dir ${RL_PCB}/bin --path_prefix "" -d ${TEST_DIR}/work -e training_td3_cpu_622 --report_type both,mean -o ${TD3_EVAL_TESTING_DIR} --runs 2 --max_steps 200 --report_type both,mean
+./eval_just_do_it.sh -p ${RL_PCB}/dataset/base/evaluation.pcb -b ${RL_PCB}/dataset/base_raw --bin_dir ${RL_PCB}/bin --path_prefix "" -d ${TEST_DIR}/work -e training_td3_cuda_262 --report_type both,mean -o ${TD3_EVAL_TESTING_DIR} --runs 4 --max_steps 600 --report_type both,mean
 
-#cd ${TEST_DIR}
+cd ${TEST_DIR}
