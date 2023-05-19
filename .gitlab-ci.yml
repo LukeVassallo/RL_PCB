@@ -19,7 +19,6 @@ build-job:       # This job runs in the build stage, which runs first.
     - general-purpose, gpu-enabled
   variables:
     GIT_STRATEGY: fetch
-    GIT_SUBMODULE_STRATEGY: recursive
   script:
     - echo "Compiling the code..."
     - source setup.sh
