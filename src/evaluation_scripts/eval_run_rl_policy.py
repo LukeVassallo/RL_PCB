@@ -280,4 +280,8 @@ def main():
         evaluation_run(settings)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        sys.exit(0) # success
+    except:
+        sys.exit(-1) # fail
