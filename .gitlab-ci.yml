@@ -4,10 +4,12 @@ stages:          # List of stages for jobs, and their order of execution
 
 before_script:
   - echo "Running global before_script"
-  - mkdir -p bin # intentionally inserted to skip cloning of private repos
-  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/KicadParser --recurse-submodules bin/KicadParser
-  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/SA_PCB --recurse-submodules bin/SA_PCB
-  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/pcbRouter --recurse-submodules bin/pcbRouter
+#  - mkdir -p bin # intentionally inserted to skip cloning of private repos
+#  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/KicadParser --recurse-submodules bin/KicadParser
+#  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/SA_PCB --recurse-submodules bin/SA_PCB
+#  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com/luke/pcbRouter --recurse-submodules bin/pcbRouter
+  - git config --global credential.helper store
+  - echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com" > ~/.git-credentials
   - ./install_tools_and_virtual_environment.sh
 
 after_script:
