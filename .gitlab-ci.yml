@@ -4,7 +4,9 @@ stages:          # List of stages for jobs, and their order of execution
 
 before_script:
   - echo "Running global before_script"
-  - mkdir -p bin # intentionally inserted to skip cloning of private repos
+  #- mkdir -p bin # intentionally inserted to skip cloning of private repos
+  - git config --global credential.helper store
+  - echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com" > ~/.git-credentials
   - ./install_tools_and_virtual_environment.sh
 
 after_script:
