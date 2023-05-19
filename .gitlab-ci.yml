@@ -4,10 +4,8 @@ stages:          # List of stages for jobs, and their order of execution
 
 before_script:
   - echo "Running global before_script"
-  #- mkdir -p bin # intentionally inserted to skip cloning of private repos
   - git config --global credential.helper store
   - echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lukevassallo.com" > ~/.git-credentials
-  - ./install_tools_and_virtual_environment.sh
 
 after_script:
 #  - source setup.sh
@@ -17,6 +15,9 @@ build-job:       # This job runs in the build stage, which runs first.
   stage: build
   tags:
     - general-purpose, gpu-enabled
+  before_script:
+    - echo "Running local before script"
+    - ./install_tools_and_virtual_environment.sh
   variables:
     GIT_STRATEGY: fetch
   script:
@@ -30,14 +31,11 @@ system-test-gpu:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - general-purpose, gpu-enabled
-  before_script:
-    - echo "Running local before_script"
-    - mkdir -p bin # intentionally inserted to skip cloning of private repos
-    - ./install_tools_and_virtual_environment.sh
   variables:
     GIT_STRATEGY: fetch
   timeout: 12h 0m
   script:
+    - ./install_tools_and_virtual_environment.sh
     - source setup.sh
     - echo ${RL_PCB}
     - cd ${RL_PCB}/tests/05_training_td3_cuda_fast/
@@ -51,14 +49,11 @@ system-test-cpu:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - general-purpose, gpu-enabled
-  before_script:
-    - echo "Running local before_script"
-    - mkdir -p bin # intentionally inserted to skip cloning of private repos
-    - ./install_tools_and_virtual_environment.sh --cpu_only
   variables:
     GIT_STRATEGY: fetch
   timeout: 12h 0m
   script:
+    - ./install_tools_and_virtual_environment.sh --cpu_only
     - source setup.sh
     - echo ${RL_PCB}
     - cd ${RL_PCB}/tests/06_training_td3_cpu_fast/
