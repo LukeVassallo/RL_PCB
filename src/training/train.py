@@ -24,7 +24,7 @@ import sys
 import os 
 import random
 
-from run_config import cmdLine_args, write_desc_log
+from run_config import cmdline_args, write_desc_log
 from hyperparameters import load_hyperparameters_from_file
 from model_setup import setup_model
 from callbacks import log_and_eval_callback
@@ -134,7 +134,7 @@ def training_run(settings):
     return [callback.best_metrics, callback.best_mean_metrics]
 
 def main():
-    args,settings = cmdLine_args()
+    args,settings = cmdline_args()
 
     if settings["redirect_stdout"] is True:
         redirection_file = os.path.join(settings["tensorboard_dir"],
