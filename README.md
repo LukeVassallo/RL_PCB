@@ -5,7 +5,7 @@ RL\_PCB is a novel learning-based method for optimising the placement of circuit
 The main contribution of this work are:
 1. The policies learn the fundamental rules of the task and demonstrate an understanding of the problem dynamics. The agent is observed taking actions that **in the long term** minimise overlap-free wirelength. At the same time, the components naturally fall in place, resulting in a coherent layout. 
 2. Since the agent represents a component, emergent behaviours are observed as a result of each component interacting with its neighbours. When we emphasise Half-Perimeter Wirelength (HPWL) in the reward function, we observe collaboration (e.g. Figure 1c, 1d); on the other hand, when we emphasise Euclidean Wirelength (EW), we observe competition (e.g. Figure 1b). 
-3. The learned behaviour is robust because training data is diverse and consistent with the evaluative feedback assigned. Consistency is achieved by extensive normalisation and eliminating all potential sources introducing bias. Similarly goes for the reward. Diversity is obtained by allowing every agent to contribute to training samples with different perspectives. 
+3. The learned behaviour is robust because training data is diverse and consistent with the evaluative feedback assigned. Consistency is achieved by extensive normalisation and eliminating all potential sources introducing bias. Similarly goes for the reward. Diversity is obtained by allowing every agent to contribute to training samples with different perspectives which is further compounded by using multiple unique circuits for training - relatively small training dataset 6 circuits.
 
 |     |     |     |
 | --- | --- | --- |
