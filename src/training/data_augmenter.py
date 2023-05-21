@@ -23,7 +23,12 @@ Example Usage:
 import logging
 import numpy as np
 
+import graph.graph as graph
+import graph.board as board
+import graph.node as node
+import graph.edge as edge
 from graph_utils import kicad_rotate_around_point
+
 
 class dataAugmenter:
     """A class that performs data augmentation on a graph.
