@@ -180,8 +180,10 @@ class log_and_eval_callback():
                 scalar_value=info[1],
                 global_step=self.model.num_timesteps)
             if self.verbose:
-                mean_episode_length = np.int32(np.round(np.mean(self.model.trackr.episode_length),0))
-                mean_episode_reward = np.round(np.mean(self.model.trackr.episode_reward),2)
+                mean_episode_length = np.int32(
+                    np.round(np.mean(self.model.trackr.episode_length),0))
+                mean_episode_reward = np.round(
+                    np.mean(self.model.trackr.episode_reward),2)
                 print(f" EVALUATION - TRAINING | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {self.model.num_timesteps} | {np.round(info[1],2)}/{mean_episode_length} | {np.round(info[0],2)}/{np.round(mean_episode_reward,2)}/{np.round(self.best_mean_episode_reward,2)}")
 
             info = self.evaluate(
@@ -198,8 +200,10 @@ class log_and_eval_callback():
                 scalar_value=info[1],
                 global_step=self.model.num_timesteps)
             if self.verbose:
-                mean_episode_length = np.int32(np.round(np.mean(self.model.trackr.episode_length),0))
-                mean_episode_reward = np.round(np.mean(self.model.trackr.episode_reward),2)
+                mean_episode_length = np.int32(
+                    np.round(np.mean(self.model.trackr.episode_length),0))
+                mean_episode_reward = np.round(
+                    np.mean(self.model.trackr.episode_reward),2)
                 print(f" EVALUATION - TEST     | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {self.model.num_timesteps} | {np.round(info[1],2)}/{mean_episode_length} | {np.round(info[0],2)}/{np.round(mean_episode_reward,2)}/{np.round(self.best_mean_episode_reward,2)}")
 
     def on_training_start(self):
@@ -423,7 +427,8 @@ class log_and_eval_callback():
                         eval_env.write_current_pcb_file(
                             path=run_output_dir,
                             filename= snapshot_filename+".pcb")
-                        # overwrite best; unique filename for easier processing with automated tools
+                        # overwrite best; unique filename for easier processing
+                        # with automated tools
                         eval_env.write_current_pcb_file(
                             path=run_output_dir,
                             filename=file_best_hpwl_zero_overlap+".pcb")
