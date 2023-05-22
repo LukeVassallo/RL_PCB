@@ -10,6 +10,8 @@ import numpy as np
 import cv2
 from graph import graph
 from graph import board
+from graph import node
+from graph import edge
 from graph_utils import kicad_rotate
 import sys
 
