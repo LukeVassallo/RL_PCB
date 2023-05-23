@@ -1,20 +1,26 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Sep 13 14:59:54 2022
+This module provides a utility function to retrieve the number of PCBs
+(Printed Circuit Boards) from a given PCB file.
 
-@author: luke
+Module: pcb
+
+Functions:
+
+    get_pcb_num(pcb_file: str) -> int: Retrieves the number of PCBs from the
+    specified PCB file.
+
+Usage example:
+from pcb import pcb
+
+pcb_file = "example.pcb"
+num_pcbs = pcb.get_pcb_num(pcb_file)
+print("Number of PCBs:", num_pcbs)
+
 """
-
-#import sys
-#sys.path.append('/home/luke/Desktop/semi_autonomous/py')
-#import os, sys
-#sys.path.append(os.path.join(os.environ["ITERATIVE_PLACER_REPO"], "py"))
-
-import pcb.pcb as pcb
+from pcb import pcb
 
 # utility function
 def get_pcb_num(pcb_file: str):
     pv = pcb.vptr_pcbs()
     pcb.read_pcb_file(pcb_file, pv)      # Read pcb file
-    return len(pv)    
+    return len(pv)

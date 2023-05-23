@@ -27,7 +27,7 @@ build-job:       # This job runs in the build stage, which runs first.
     - ls -alh
     - echo "Compile complete."
 
-system-test-gpu:   # This job runs in the test stage.
+system-test-gpu-td3:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - general-purpose, gpu-enabled
@@ -44,6 +44,24 @@ system-test-gpu:   # This job runs in the test stage.
     paths:
       - ./tests/05_training_td3_cuda_fast/work/eval_testing_set/evaluation_report_mean.pdf
       - ./tests/05_training_td3_cuda_fast/experiment_report.pdf
+
+system-test-gpu-sac:  # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
+  tags:
+    - general-purpose, gpu-enabled
+  variables:
+    GIT_STRATEGY: fetch
+  timeout: 12h 0m
+  script:
+    - ./install_tools_and_virtual_environment.sh
+    - source setup.sh
+    - echo ${RL_PCB}
+    - cd ${RL_PCB}/tests/07_training_sac_cuda_fast/
+    - ./run.sh
+  artifacts:
+    paths:
+      - ./tests/07_training_sac_cuda_fast/work/eval_testing_set/evaluation_report_mean.pdf
+      - ./tests/07_training_sac_cuda_fast/experiment_report.pdf      
 
 system-test-cpu:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
