@@ -19,7 +19,7 @@ charts = {
                                             'algorithms': ['SAC'],
                                             'multi_agent': True,
                                             'window': 10,
-                                            'title': "Parameter test w/ emphasis on wirelength (W=6, H=2, O=2)",
+                                            'title': "Parameter test w/ emphasis on wirelength (W=2, H=6, O=2)",
                                             'xlabel': "Timesteps (unit)",
                                             'ylabel': "Average return (unit)",
                                             'label':    {
