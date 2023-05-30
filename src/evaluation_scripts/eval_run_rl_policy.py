@@ -1,10 +1,25 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Sep 13 12:27:13 2022
+This module provides functions for evaluating a multi-agent PCB component
+placement using reinforcement learning.
 
-@author: luke
+It includes the following functions:
+
+- configure_seed(args): Configure the seed values for random number generation
+based on the provided arguments.
+- cmdline_args(): Parse command line arguments and return the settings for
+evaluation.
+- set_seed_everywhere(seed): Set the seed for random number generation in
+various libraries.
+- evaluation_run(settings): Perform the evaluation run using the given settings.
+
+Note: This module requires the following dependencies: os, sys, pathlib,
+argparse, datetime, torch, numpy, and random.
+
+Usage example:
+args, settings = cmdline_args()
+evaluation_run(settings)
 """
+
 import os
 import sys
 from pathlib import Path
@@ -22,26 +37,59 @@ from model_setup import setup_model
 from hyperparameters import load_hyperparameters_from_file
 
 def configure_seed(args):
+    """
+    Configure the seed values for random number generation based on the
+    provided arguments.
 
+    Args:
+        args: An object containing the configuration arguments.
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    Notes:
+        - If `args.auto_seed` is True and a valid seed configuration is
+        provided, the auto_seed takes precedence and will override the
+        provided seed values.
+        - If `args.auto_seed` is True, the run seed values will be assigned
+        randomly based on an RNG seed generated with the current time.
+        - If `args.auto_seed` is False, a seed value should be provided for
+        each run, or a warning will be issued.
+
+    Example:
+        configure_seed(args)
+    """
     if (args.auto_seed is True) and (args.seed is not None):
         if len(args.seed) == args.runs:
             print("auto_seed is enabled while a valid seed configuration was provided. auto_seed takes precedence and will override the provided seed values.")
 
-    if args.auto_seed is True:  # assign run seed values randomly based of an rng seed with current time.
+    # assign run seed values randomly based of an rng seed with current time.
+    if args.auto_seed is True:
         args.seed = []
         rng = np.random.default_rng(seed=int(datetime.now().strftime("%s")))
         for _ in range(args.runs):
-            args.seed.append(np.int0(rng.uniform(low=0,high=(np.power(2,32)-1))))
+            args.seed.append(
+                np.int0(rng.uniform(low=0,high=(np.power(2,32)-1)))
+                )
     else:
-        if (args.seed is None) or (len(args.seed) != args.runs):   # seed value is not provided or not provided correctly
+        # seed value is not provided or not provided correctly
+        if (args.seed is None) or (len(args.seed) != args.runs):
             # issue a warning
             rng = np.random.default_rng(seed=99)
             args.seed = []
             for _ in range(args.runs):
-                args.seed.append(np.int0(rng.uniform(low=0,high=(np.power(2,32)-1))))
+                args.seed.append(
+                    np.int0(rng.uniform(low=0,high=(np.power(2,32)-1)))
+                    )
 
 def cmdline_args():
-    parser = argparse.ArgumentParser(description="Multi-agent pcb component placement evaluation", usage="<script-name> -p <pcb_file> --rl_model_type [TD3 | SAC]", epilog="This text will be shown after the help")
+    parser = argparse.ArgumentParser(
+        description="Multi-agent pcb component placement evaluation",
+        usage="<script-name> -p <pcb_file> --rl_model_type [TD3 | SAC]",
+        epilog="This text will be shown after the help")
     parser.add_argument("--policy", type=str, choices=["TD3", "SAC"], required=True)                  # Policy name (TD3, DDPG or OurDDPG)
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--pcb_file", type=str, required=True)
