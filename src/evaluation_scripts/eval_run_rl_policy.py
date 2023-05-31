@@ -90,20 +90,33 @@ def cmdline_args():
         description="Multi-agent pcb component placement evaluation",
         usage="<script-name> -p <pcb_file> --rl_model_type [TD3 | SAC]",
         epilog="This text will be shown after the help")
-    parser.add_argument("--policy", type=str, choices=["TD3", "SAC"], required=True)                  # Policy name (TD3, DDPG or OurDDPG)
+    parser.add_argument("--policy", type=str, choices=["TD3", "SAC"],
+                        required=True)
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--pcb_file", type=str, required=True)
-    parser.add_argument("-s", "--seed", required=False, nargs="+", type=np.uint32, default=None)             # Sets Gym, PyTorch and Numpy seeds
-    parser.add_argument("--device", default="cuda", choices=["cuda", "cpu"], required=False)
+    # Sets Gym, PyTorch and Numpy seeds
+    parser.add_argument("-s", "--seed", required=False, nargs="+",
+                        type=np.uint32, default=None)
+    parser.add_argument("--device", default="cuda", choices=["cuda", "cpu"],
+                        required=False)
     parser.add_argument("--hyperparameters", required=False, type=str, default="auto", help="path to a hyperparameters file. If auto, the hyperparamters file will be retrived from the description file.")
-    parser.add_argument("--max_steps", type=int, default=int(1e3), required=False)   # Max time steps to run environment (1e6)
-    parser.add_argument("--runs", required=False, type=int, default=1, help="Number of times to run the experiment.")
+    # Max time steps to run environment (1e6)
+    parser.add_argument("--max_steps", type=int, default=int(1e3),
+                        required=False)
+    parser.add_argument("--runs", required=False, type=int, default=1,
+                        help="Number of times to run the experiment.")
     parser.add_argument("--auto_seed", required=False, action="store_true", default=False, help="ignore seed value and generate one based of the current time for everyrun")
-    parser.add_argument("--verbose", required=False, type=int, default=0, help="Program verbosity")
-    parser.add_argument("-o", "--output", required=False, type=str, default="./eval_output")
-    parser.add_argument("--quick_eval", required=False, action="store_true", default=False, help="When true video and run log will not be generated.")
-    parser.add_argument("--reward_params",  type=str, required=True, help="Colon seperated weights for euclidean wirelength, hpwl and overlap")
-    parser.add_argument("--shuffle_idxs", required=False, action="store_true", help="shuffle agent idx prior to stepping in the environment")
+    parser.add_argument("--verbose", required=False, type=int, default=0,
+                        help="Program verbosity")
+    parser.add_argument("-o", "--output", required=False, type=str,
+                        default="./eval_output")
+    parser.add_argument("--quick_eval", required=False, action="store_true",
+                        default=False,
+                        help="If true video and run log won't be generated.")
+    parser.add_argument("--reward_params",  type=str, required=True,
+                        help="Colon seperated weights for euclidean wirelength, hpwl and overlap")
+    parser.add_argument("--shuffle_idxs", required=False, action="store_true",
+                        help="shuffle agent idx prior to stepping in the environment")
 
     args = parser.parse_args()
     settings = {}
@@ -270,8 +283,15 @@ def evaluation_run(settings):
                 # Capture snapshot
                 snapshot_filename=f'{settings["run"]}.{settings["runs"]-1}.{episode_steps}'
                 eval_env.tracker.capture_snapshot(fileName=os.path.join(run_output_dir, snapshot_filename+".png"))
-                eval_env.write_current_pcb_file(path=run_output_dir, filename= snapshot_filename+".pcb")  # Yes this is exactly like the previous one.
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=file_best_hpwl_00_overlap+".pcb")  # overwrite best; unique filename for easier processing with automated tools
+                # Yes this is exactly like the previous one.
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename= snapshot_filename+".pcb")
+                # overwrite best; unique filename for easier processing with
+                # automated tools
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename=file_best_hpwl_00_overlap+".pcb")
 
                 if settings["verbose"] == 1:
                     print(f"run={settings['run']}/{settings['runs']-1} @ episode_step={episode_steps} : Zero overlap best hpwl : hpwl={np.round(hpwl,4)}, overlap={np.round(np.sum(all_ol)/8,4)}")
@@ -279,15 +299,23 @@ def evaluation_run(settings):
             if (hpwl < best_hpwl_at_10_overlap ) and (np.max(all_ol) <= 10.0):
                 best_hpwl_at_10_overlap = hpwl
                 filename = file_best_hpwl_10_overlap + f"{settings['run']}.{settings['runs']-1}.{episode_steps}.pcb"
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=filename)
+                eval_env.write_current_pcb_file(path=run_output_dir,
+                                                filename=filename)
                 evaluation_log.write(f"run={settings['run']}/{settings['runs']-1} @ episode_step={episode_steps} : 10% overlap best hpwl : hpwl={np.round(best_hpwl_at_10_overlap,4)}, overlap={np.round(np.sum(all_ol)/8,4)}\r\n")
                 evaluation_log.write(f"all_ol={all_ol}\r\n")
 
                 # Capture snapshot
                 snapshot_filename=f'{settings["run"]}.{settings["runs"]-1}.{episode_steps}'
                 eval_env.tracker.capture_snapshot(fileName=os.path.join(run_output_dir, snapshot_filename+".png"))
-                eval_env.write_current_pcb_file(path=run_output_dir, filename= snapshot_filename+".pcb")  # Yes this is exactly like the previous one.
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=file_best_hpwl_10_overlap+".pcb")  # overwrite best; unique filename for easier processing with automated tools
+                # Yes this is exactly like the previous one.
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename= snapshot_filename+".pcb")
+                # overwrite best; unique filename for easier processing with
+                # automated tools
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename=file_best_hpwl_10_overlap+".pcb")
 
                 if settings["verbose"] == 1:
                     print(f'run={settings["run"]}/{settings["runs"]-1} @ episode_step={episode_steps} : 10% overlap best hpwl : hpwl={np.round(best_hpwl_at_10_overlap,4)}, overlap={np.round(np.sum(all_ol)/8,4)}')
@@ -295,15 +323,23 @@ def evaluation_run(settings):
             if (hpwl < best_hpwl_at_20_overlap ) and (np.max(all_ol) <= 20.0):
                 best_hpwl_at_20_overlap = hpwl
                 filename = file_best_hpwl_20_overlap + f'{settings["run"]}.{settings["runs"]-1}.{episode_steps}.pcb'
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=filename)
+                eval_env.write_current_pcb_file(path=run_output_dir,
+                                                filename=filename)
                 evaluation_log.write(f"run={settings['run']}/{settings['runs']-1} @ episode_step={episode_steps} : 20% overlap best hpwl : hpwl={np.round(best_hpwl_at_20_overlap,4)}, overlap={np.round(np.sum(all_ol)/8,4)}\r\n")
                 evaluation_log.write(f"all_ol={all_ol}\r\n")
 
                 # Capture snapshot
                 snapshot_filename=f"{settings['run']}.{settings['runs']-1}.{episode_steps}"
                 eval_env.tracker.capture_snapshot(fileName=os.path.join(run_output_dir, snapshot_filename+".png"))
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=snapshot_filename+".pcb")  # Yes this is exactly like the previous one.
-                eval_env.write_current_pcb_file(path=run_output_dir, filename=file_best_hpwl_20_overlap+".pcb")  # overwrite best; unique filename for easier processing with automated tools
+                # Yes this is exactly like the previous one.
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename=snapshot_filename+".pcb")
+                # overwrite best; unique filename for easier processing with
+                # automated tools
+                eval_env.write_current_pcb_file(
+                    path=run_output_dir,
+                    filename=file_best_hpwl_20_overlap+".pcb")
 
                 if settings["verbose"] == 1:
                     print(f"run={settings['run']}/{settings['runs']-1} @ episode_step={episode_steps} : 20% overlap best hpwl : hpwl={np.round(best_hpwl_at_20_overlap,4)}, overlap={np.round(np.sum(all_ol)/8,4)}")
@@ -315,8 +351,14 @@ def evaluation_run(settings):
         evaluation_log.close()
 
         if settings["quick_eval"] is False:
-            eval_env.tracker.create_video(fileName=os.path.join(run_output_dir, f"{settings['run']}.mp4"))
-            eval_env.tracker.log_run_to_file(path=run_output_dir, filename=f"{settings['run']}.log", kicad_pcb=eval_env.g.get_kicad_pcb_file())
+            eval_env.tracker.create_video(
+                fileName=os.path.join(run_output_dir,
+                                      f"{settings['run']}.mp4")
+                                      )
+            eval_env.tracker.log_run_to_file(
+                path=run_output_dir,
+                filename=f"{settings['run']}.log",
+                kicad_pcb=eval_env.g.get_kicad_pcb_file())
 
         eval_env.tracker.reset()
 

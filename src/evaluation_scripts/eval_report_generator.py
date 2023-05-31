@@ -59,8 +59,12 @@ class PageNumCanvas(canvas.Canvas):
         page = "Page %s of %s" % (self._pageNumber, page_count)
         date = datetime.now().strftime("%Y-%m-%d %H:%M")
         self.setFont("Helvetica", 9)
-        self.drawRightString(int(0.17*page_size[0]), int(0.95*page_size[1]), date)
-        self.drawRightString(int(0.93*page_size[0]), int(0.95*page_size[1]), page)
+        self.drawRightString(int(0.17*page_size[0]),
+                             int(0.95*page_size[1]),
+                             date)
+        self.drawRightString(int(0.93*page_size[0]),
+                             int(0.95*page_size[1]),
+                             page)
 
 def cmdline_args():
     parser = argparse.ArgumentParser(
@@ -111,7 +115,7 @@ def main():
     pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
 
     styles = getSampleStyleSheet()
-    styleS = ParagraphStyle("yourtitle",
+    style_s = ParagraphStyle("yourtitle",
                         fontName="Verdana",
                         fontSize=8,
                         spaceAfter=6
@@ -121,8 +125,8 @@ def main():
                             fontSize=12,
                             spaceAfter=6
                         )
-    styleH1 = styles["Heading1"]
-    styleH2 = styles["Heading2"]
+    style_h1 = styles["Heading1"]
+    style_h2 = styles["Heading2"]
 
     p_frame = Frame(0.5 * inch, 0.5 * inch, 7.5 * inch, 10 * inch,
                 leftPadding=0, rightPadding=0,
@@ -134,34 +138,39 @@ def main():
                     topPadding=0, bottomPadding=0,
                     id="landscape_frame")
 
-    portrait_tmpl = PageTemplate(id="portrait_tmpl", frames=[p_frame], pagesize=A4)
-    landscape_tmpl = PageTemplate(id="landscape_tmpl", frames=[l_frame], pagesize=landscape(A4))
+    portrait_tmpl = PageTemplate(id="portrait_tmpl",
+                                 frames=[p_frame],
+                                 pagesize=A4)
+    landscape_tmpl = PageTemplate(id="landscape_tmpl",
+                                  frames=[l_frame],
+                                  pagesize=landscape(A4))
 
     doc.addPageTemplates([portrait_tmpl, landscape_tmpl])
 
     report_data = []
-    report_data.append(Paragraph("Experiment Report",styleH1))
+    report_data.append(Paragraph("Experiment Report",style_h1))
     report_data.append(Paragraph(f"Start of automated test report {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",style))
 
     try:
         report_data.append(Paragraph(f'Author={os.environ["USERNAME"]}@{os.uname()[1]} obo {rc["author"]}',style))
     except:
         print("Could not get 'USERNAME'. This may happen in an RDP session.")
-        report_data.append(Paragraph(f"Author=UNKNOWN@{os.uname()[1]} obo Luke Vassallo",style))
+        report_data.append(Paragraph(
+            f"Author=UNKNOWN@{os.uname()[1]} obo Luke Vassallo",style))
 
-    report_data.append(Paragraph("Machine Information",styleH1))
+    report_data.append(Paragraph("Machine Information",style_h1))
     report_data += machine_info_in_paragraphs(style)
-    report_data.append(Paragraph("Library Information",styleH1))
+    report_data.append(Paragraph("Library Information",style_h1))
     report_data += lib_info_in_paragraphs(style)
 
     for j in range(len(settings["run_dirs"])):
         report_data.append(PageBreak())
-        report_data.append(Paragraph(f'{settings["experiments"][j]}:{settings["run_dirs"][j].split("/")[-1]}',styleH1))
+        report_data.append(Paragraph(f'{settings["experiments"][j]}:{settings["run_dirs"][j].split("/")[-1]}',style_h1))
         report_data.append(Paragraph(f'\tSteps per trial                   = {settings["max_steps"]}',style))
         report_data.append(Paragraph(f'\tEuclidean wirelength (w)          = {settings["reward_params"][j]["w"]}',style))
         report_data.append(Paragraph(f'\tHalf perimeter wirelength (hpwl)  = {settings["reward_params"][j]["hpwl"]}',style))
         report_data.append(Paragraph(f'\tOverlap (o)                       = {settings["reward_params"][j]["o"]}',style))
-        file = open(os.path.join(settings["run_dirs"][j],"results.txt"))
+        file = open(os.path.join(settings["run_dirs"][j],"results.txt"), encoding="utf-8")
         pcbs=[]
         data={}
         while True:
@@ -194,7 +203,7 @@ def main():
 
             mean_pcb_col = ["pcb name"]
             mean_trial_col = ["run"]
-            mean_best_hpwl_00 = [f"0% overlap (#)¹"]
+            mean_best_hpwl_00 = ["0% overlap (#)¹"]
             mean_best_hpwl_10 = ["10% overlap (#)¹"]
             mean_best_hpwl_20 = ["20% overlap (#)¹"]
             mean_sa_pcb = ["simulated\nannealing"]
@@ -209,22 +218,30 @@ def main():
                         pcb_col.append(pcb_key)
                     trial_col.append(trial_key)
                     if "best_hpwl_00_overlap" in trial_value:
-                        best_hpwl_00.append( np.round(float(trial_value["best_hpwl_00_overlap"][wl_idx]),2) )
+                        best_hpwl_00.append(np.round(
+                            float(trial_value["best_hpwl_00_overlap"][wl_idx]),
+                            2))
                     else:
                         best_hpwl_00.append("-")
 
                     if "best_hpwl_10_overlap" in trial_value:
-                        best_hpwl_10.append( np.round(float(trial_value["best_hpwl_10_overlap"][wl_idx]),2) )
+                        best_hpwl_10.append(np.round(
+                            float(trial_value["best_hpwl_10_overlap"][wl_idx]),
+                            2))
                     else:
                         best_hpwl_10.append("-")
 
                     if "best_hpwl_20_overlap" in trial_value:
-                        best_hpwl_20.append( np.round(float(trial_value["best_hpwl_20_overlap"][wl_idx]),2))
+                        best_hpwl_20.append(np.round(
+                            float(trial_value["best_hpwl_20_overlap"][wl_idx]),
+                            2))
                     else:
                         best_hpwl_20.append("-")
 
                     if ("SA_PCB" in trial_value) and (args.skip_simulated_annealing is False):
-                        sa_pcb.append(np.round(float(trial_value["SA_PCB"][wl_idx]),2))
+                        sa_pcb.append(np.round(
+                            float(trial_value["SA_PCB"][wl_idx]),
+                            2))
                     else:
                         sa_pcb.append("-")
 
@@ -239,12 +256,12 @@ def main():
 
                 mean_best_hpwl_00.append(f"{np.round(np.mean( [ x for x in best_hpwl_00[-n_trials:] if isinstance(x, np.float64) ] ),2)} \u00B1 {np.round(np.std( [ x for x in best_hpwl_00[-n_trials:] if isinstance(x, np.float64) ] ),2)} ({len([ x for x in best_hpwl_00[-n_trials:] if isinstance(x, np.float64) ])})")
 
-                mean_best_hpwl_10.append(f"{np.round(np.mean( [ x for x in best_hpwl_10[-n_trials:] if type(x) == np.float64 ] ),2)} \u00B1 {np.round(np.std( [ x for x in best_hpwl_10[-n_trials:] if type(x) == np.float64 ] ),2)} ({len([ x for x in best_hpwl_10[-n_trials:] if type(x) == np.float64 ])})")
+                mean_best_hpwl_10.append(f"{np.round(np.mean( [ x for x in best_hpwl_10[-n_trials:] if isinstance(x, np.float64) ] ),2)} \u00B1 {np.round(np.std( [ x for x in best_hpwl_10[-n_trials:] if isinstance(x, np.float64) ] ),2)} ({len([ x for x in best_hpwl_10[-n_trials:] if isinstance(x, np.float64) ])})")
 
-                mean_best_hpwl_20.append(f"{np.round(np.mean( [ x for x in best_hpwl_20[-n_trials:] if type(x) == np.float64 ] ),2)} \u00B1 {np.round(np.std( [ x for x in best_hpwl_20[-n_trials:] if type(x) == np.float64 ] ),2)} ({len([ x for x in best_hpwl_20[-n_trials:] if type(x) == np.float64 ])})")
+                mean_best_hpwl_20.append(f"{np.round(np.mean( [ x for x in best_hpwl_20[-n_trials:] if isinstance(x, np.float64) ] ),2)} \u00B1 {np.round(np.std( [ x for x in best_hpwl_20[-n_trials:] if isinstance(x, np.float64) ] ),2)} ({len([ x for x in best_hpwl_20[-n_trials:] if isinstance(x, np.float64) ])})")
 
                 if args.skip_simulated_annealing is False:
-                    mean_sa_pcb.append(f"{np.round(np.mean( [ x for x in sa_pcb[-n_trials:] if type(x) == np.float64 ] ),2)} \u00B1 {np.round(np.std( [ x for x in sa_pcb[-n_trials:] if type(x) == np.float64 ] ),2)} ({len([ x for x in sa_pcb[-n_trials:] if type(x) == np.float64 ])})")
+                    mean_sa_pcb.append(f"{np.round(np.mean( [ x for x in sa_pcb[-n_trials:] if isinstance(x, np.float64) ] ),2)} \u00B1 {np.round(np.std( [ x for x in sa_pcb[-n_trials:] if isinstance(x, np.float64) ] ),2)} ({len([ x for x in sa_pcb[-n_trials:] if isinstance(x, np.float64) ])})")
 
             colwidths =[]
 
@@ -313,9 +330,9 @@ def main():
 
             if wl_idx == 0:
                 report_data.append(
-                    Paragraph("Estimated Wirelength (HPWL)",styleH2))
+                    Paragraph("Estimated Wirelength (HPWL)",style_h2))
             else:
-                report_data.append(Paragraph("Routed Wirelength",styleH2))
+                report_data.append(Paragraph("Routed Wirelength",style_h2))
 
             if (settings["report_type"] == "raw") or (settings["report_type"] == "both"):
                 report_data.append(Paragraph(f'<br />Raw trial data for run {settings["run_dirs"][j]}<br />',style))
@@ -324,7 +341,7 @@ def main():
             if (settings["report_type"] == "mean") or (settings["report_type"] == "both"):
                 report_data.append(Paragraph(f'<br />Mean over all trials in run {settings["run_dirs"][j]}',style))
                 report_data.append(t_mean_cols)
-                report_data.append(Paragraph('¹ # indicates the number of layouts over which the mean \u00B1 std was computed', styleS))
+                report_data.append(Paragraph("¹ # indicates the number of layouts over which the mean \u00B1 std was computed", style_s))
             report_data.append(Paragraph("<br />",style))
 
     doc.build(report_data, canvasmaker=PageNumCanvas)
