@@ -12,7 +12,11 @@ class tracker():
 
         self.frame_buffer = np.array([])
 
-    def add_observation(self, comp_grids=None, los_grids=None, los=None, ol_grids=None, ol=None):
+    def add_observation(self, comp_grids=None,
+                        los_grids=None,
+                        los=None,
+                        ol_grids=None,
+                        ol=None):
         if comp_grids is not None:
             self.all_comp_grids.append(comp_grids)
 
@@ -29,15 +33,14 @@ class tracker():
 
     def update_frame_buffer(self, v_id=None):
         if self.frame_buffer.size == 0:
-            self.frame_buffer = video_utils.video_frames(self.all_comp_grids, self.ratsnest, v_id=v_id)
+            self.frame_buffer = video_utils.video_frames(self.all_comp_grids,
+                                                         self.ratsnest,
+                                                         v_id=v_id)
         else:
-            self.frame_buffer = np.concatenate((self.frame_buffer,video_utils.video_frames(self.all_comp_grids, self.ratsnest, v_id=v_id)), axis=0)
+            self.frame_buffer = np.concatenate(
+                (self.frame_buffer, video_utils.video_frames(self.all_comp_grids, self.ratsnest, v_id=v_id)),
+                 axis=0)
 
     def write_frame_buffer(self, fileName=None, reset=False):
         video_utils.write_frame_buffer(self.frame_buffer)
-        self.frame_buffer = np.array([])    
-
-       
-    
-  
-        
+        self.frame_buffer = np.array([])

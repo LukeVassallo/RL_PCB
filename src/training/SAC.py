@@ -5,9 +5,8 @@ from utils import soft_update, hard_update, ReplayMemory
 import time
 import numpy as np
 
-from torch.distributions import Normal
 import tracker
-import gym 
+import gym
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 epsilon = 1e-6
@@ -19,7 +18,10 @@ def weights_init_(m):
         torch.nn.init.constant_(m.bias, 0)
 
 class QNetwork(torch.nn.Module):
-    def __init__(self, num_inputs, num_actions, qf : list = [400, 300], activation_fn: str = "relu"):
+    def __init__(self, num_inputs,
+                 num_actions,
+                 qf : list = [400, 300],
+                 activation_fn: str = "relu"):
 
         super(QNetwork, self).__init__()
 
@@ -27,14 +29,14 @@ class QNetwork(torch.nn.Module):
             self.activation_fn = torch.nn.functional.relu
         elif activation_fn == "tanh":
             self.activation_fn = torch.nn.functional.tanh
-        
+
         # Q1 architecture
         self.qf1 = torch.nn.Sequential()
         in_size = num_inputs + num_actions
         for layer_sz in qf:
             self.qf1.append(torch.nn.Linear(in_size, layer_sz))
             in_size = layer_sz
-        self.qf1.append(torch.nn.Linear(in_size, 1))        
+        self.qf1.append(torch.nn.Linear(in_size, 1))
 
 		# Q2 architecture
         self.qf2 = torch.nn.Sequential()
@@ -42,13 +44,13 @@ class QNetwork(torch.nn.Module):
         for layer_sz in qf:
             self.qf2.append(torch.nn.Linear(in_size, layer_sz))
             in_size = layer_sz
-        self.qf2.append(torch.nn.Linear(in_size, 1))  
+        self.qf2.append(torch.nn.Linear(in_size, 1))
 
         # self.apply(weights_init_)
 
     def forward(self, state, action):
         sa = torch.cat([state, action], 1)
-        
+
         q1 = sa
         for i in range(len(self.qf1)-1):
             q1 = self.activation_fn(self.qf1[i](q1))
@@ -60,25 +62,32 @@ class QNetwork(torch.nn.Module):
         q2 = self.qf2[-1](q2)
 
         return q1, q2
-    
+
 class GaussianPolicy(torch.nn.Module):
-    def __init__(self, num_inputs, num_actions, pi : list = [400, 300], activation_fn: str = "relu", action_space=None, device: str = "cuda"):
+    def __init__(self,
+                 num_inputs,
+                 num_actions,
+                 pi : list = [400, 300],
+                 activation_fn: str = "relu",
+                 action_space=None,
+                 device: str = "cuda"):
         super(GaussianPolicy, self).__init__()
-        
+
         if device == "cuda":
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:            
+            self.device = torch.device(
+                "cuda" if torch.cuda.is_available() else "cpu")
+        else:
             self.device = torch.device("cpu")
-        
+
         self.pi = torch.nn.Sequential()
         in_size = num_inputs
         for layer_sz in pi:
             self.pi.append(torch.nn.Linear(in_size, layer_sz))
-            in_size = layer_sz      
-        
+            in_size = layer_sz
+
         self.mean_linear = torch.nn.Linear(in_size, num_actions)
         self.log_std_linear = torch.nn.Linear(in_size, num_actions)
-		
+
         if activation_fn == "relu":
             self.activation_fn = torch.nn.functional.relu
         elif activation_fn == "tanh":
@@ -93,7 +102,7 @@ class GaussianPolicy(torch.nn.Module):
                 (action_space.high - action_space.low) / 2.)
             self.action_bias = torch.FloatTensor(
                 (action_space.high + action_space.low) / 2.)
-   
+
     def forward(self, state):
         x = state
         for i in range(len(self.pi)):
@@ -102,12 +111,13 @@ class GaussianPolicy(torch.nn.Module):
         log_std = self.log_std_linear(x)
         log_std = torch.clamp(log_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
         return mean, log_std
-    
+
     def sample(self, state):
         mean, log_std = self.forward(state)
         std = log_std.exp()
-        normal = Normal(mean, std)
-        x_t = normal.rsample()  # for reparameterization trick (mean + std * N(0,1))
+        normal = torch.distributions.Normal(mean, std)
+        # for reparameterization trick (mean + std * N(0,1))
+        x_t = normal.rsample()
         y_t = torch.tanh(x_t)
         action = y_t * self.action_scale + self.action_bias
         log_prob = normal.log_prob(x_t)
@@ -121,7 +131,7 @@ class GaussianPolicy(torch.nn.Module):
         self.action_scale = self.action_scale.to(device)
         self.action_bias = self.action_bias.to(device)
         return super(GaussianPolicy, self).to(device)
-    
+
     def select_action(self, state, evaluate=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if evaluate is False:
@@ -129,49 +139,6 @@ class GaussianPolicy(torch.nn.Module):
         else:
             _, _, action = self.sample(state)
         return action.detach().cpu().numpy()[0]
-
-
-#class DeterministicPolicy(nn.Module):
-    #def __init__(self, num_inputs, num_actions, hidden_dim=256, action_space=None):
-        #super(DeterministicPolicy, self).__init__()
-        
-        #self.linear1 = nn.Linear(num_inputs, 400)
-        #self.linear2 = nn.Linear(400, 300)
-
-        #self.mean = nn.Linear(300, num_actions)
-        #self.noise = torch.Tensor(num_actions)
-
-        #self.apply(weights_init_)
-
-        ## action rescaling
-        #if action_space is None:
-            #self.action_scale = 1.
-            #self.action_bias = 0.
-        #else:
-            #self.action_scale = torch.FloatTensor(
-                #(action_space.high - action_space.low) / 2.)
-            #self.action_bias = torch.FloatTensor(
-                #(action_space.high + action_space.low) / 2.)
-
-    #def forward(self, state):
-        #x = F.relu(self.linear1(state))
-        #x = F.relu(self.linear2(x))
-        #mean = torch.tanh(self.mean(x)) * self.action_scale + self.action_bias
-        #return mean
-
-    #def sample(self, state):
-        #mean = self.forward(state)
-        #noise = self.noise.normal_(0., std=0.1)
-        #noise = noise.clamp(-0.25, 0.25)
-        #action = mean + noise
-        #return action, torch.tensor(0.), mean
-
-    #def to(self, device):
-        #self.action_scale = self.action_scale.to(device)
-        #self.action_bias = self.action_bias.to(device)
-        #self.noise = self.noise.to(device)
-        #return super(DeterministicPolicy, self).to(device)
-
 
 class SAC(object):
     def __init__(
@@ -181,81 +148,93 @@ class SAC(object):
             train_env,
             device:str = "cpu",
             early_stopping:int = 100_000,
-            state_dim:int = 23,                     # used when a training environment is not supplied
-            action_dim:int = 3,                     # used when a training environment is not supplied
+            # used when a training environment is not supplied
+            state_dim:int = 23,
+            action_dim:int = 3,
             verbose:int =0
             ):
-            
+
         self.gamma = hyperparameters["gamma"]       # 0.99
-        self.tau = hyperparameters["tau"]           # 0.005 
+        self.tau = hyperparameters["tau"]           # 0.005
         self.alpha = 0.2                            # args.alpha
         self.lr = hyperparameters["learning_rate"]  # 3e-4
         self.batch_size = hyperparameters["batch_size"]
         self.buffer_size = hyperparameters["buffer_size"]
-        self.gradient_steps = 1                     # self.gradient_steps = hyperparameters["gradient_steps"]         
-        self.policy_type = "Gaussian"               # args.policy
-        self.target_update_interval = 1             # args.target_update_interval
-        self.automatic_entropy_tuning = True        # args.automatic_entropy_tuning
+        self.gradient_steps = 1
+        self.policy_type = "Gaussian"
+        self.target_update_interval = 1
+        self.automatic_entropy_tuning = True
 
         if device == "cuda":
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:            
+            self.device = torch.device(
+                "cuda" if torch.cuda.is_available() else "cpu")
+        else:
             self.device = torch.device("cpu")
-            
+
         if verbose > 1:
-            print(f"Model SAC is configured to learn with device {self.device}")            
-        
+            print(f"Model SAC is configured to learn with device {self.device}")
+
         self.train_env = train_env
-                
+
         if self.train_env is not None:
             state_dim = self.train_env.agents[0].get_observation_space_shape()
             action_dim = self.train_env.agents[0].action_space.shape[0]
         else:
             action_shape = (3,)
-            action_space = gym.spaces.Box(low=np.array([0,0,0], dtype=np.float32), high=np.array([1,2*np.pi,1], dtype=np.float32))
+            action_space = gym.spaces.Box(
+                low=np.array([0,0,0],dtype=np.float32),
+                high=np.array([1,2*np.pi,1],dtype=np.float32))
 
-        self.critic = QNetwork(state_dim, action_dim, hyperparameters["net_arch"]["qf"], hyperparameters["activation_fn"]).to(device=self.device)
-        self.critic_optim = Adam(self.critic.parameters(), lr=self.lr)#args.lr)
+        self.critic = QNetwork(state_dim,
+                               action_dim,
+                               hyperparameters["net_arch"]["qf"],
+                               hyperparameters["activation_fn"]).to(device=self.device)
+        self.critic_optim = Adam(self.critic.parameters(), lr=self.lr)
 
-        self.critic_target = QNetwork(state_dim, action_dim, hyperparameters["net_arch"]["qf"], hyperparameters["activation_fn"]).to(self.device)
+        self.critic_target = QNetwork(state_dim,
+                                      action_dim,
+                                      hyperparameters["net_arch"]["qf"],
+                                      hyperparameters["activation_fn"]).to(self.device)
 
         hard_update(self.critic_target, self.critic)
 
-        #if self.policy_type == "Gaussian":
-        # Target Entropy = −dim(A) (e.g. , -6 for HalfCheetah-v2) as given in the paper
         if self.automatic_entropy_tuning is True:
-            # self.target_entropy = -torch.prod(torch.Tensor(action_space.shape).to(self.device)).item()
             if self.train_env is not None:
                 self.target_entropy = -torch.prod(torch.Tensor(train_env.agents[0].action_space.shape).to(self.device)).item()
             else:
                 self.target_entropy = -torch.prod(torch.Tensor(action_shape).to(self.device)).item()
-            self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
-            self.alpha_optim = Adam([self.log_alpha], lr=self.lr)#args.lr)
+            self.log_alpha = torch.zeros(1,
+                                         requires_grad=True,
+                                         device=self.device)
+            self.alpha_optim = Adam([self.log_alpha], lr=self.lr)
 
         if self.train_env is not None:
-            self.policy = GaussianPolicy(state_dim, action_dim, hyperparameters["net_arch"]["pi"], hyperparameters["activation_fn"], action_space=train_env.agents[0].action_space, device=device).to(self.device)
+            self.policy = GaussianPolicy(state_dim,
+                                         action_dim,
+                                         hyperparameters["net_arch"]["pi"],
+                                         hyperparameters["activation_fn"],
+                                         action_space=train_env.agents[0].action_space,
+                                         device=device).to(self.device)
         else:
-            self.policy = GaussianPolicy(state_dim, action_dim, hyperparameters["net_arch"]["pi"], hyperparameters["activation_fn"], action_space=action_space, device=device).to(self.device)
+            self.policy = GaussianPolicy(state_dim,
+                                         action_dim,
+                                         hyperparameters["net_arch"]["pi"],
+                                         hyperparameters["activation_fn"],
+                                         action_space=action_space,
+                                         device=device).to(self.device)
 
-        self.policy_optim = Adam(self.policy.parameters(), lr=self.lr)#args.lr)
+        self.policy_optim = Adam(self.policy.parameters(), lr=self.lr)
 
-        #else:
-            #self.alpha = 0
-            #self.automatic_entropy_tuning = False
-            ## self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
-            ## self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], action_space=action_space).to(self.device)
-            #self.policy = DeterministicPolicy(state_dim, action_dim, action_space=train_env.action_space).to(self.device)
-
-            #self.policy_optim = Adam(self.policy.parameters(), lr=self.lr)#args.lr)
-            
         # Memory
-        self.replay_buffer = ReplayMemory(capacity=hyperparameters["buffer_size"], device=self.device) 
-        self.trackr = tracker.tracker(avg_size=100,rl_policy_type="SAC")   
-        
+        self.replay_buffer = ReplayMemory(
+            capacity=hyperparameters["buffer_size"],
+            device=self.device)
+        self.trackr = tracker.tracker(avg_size=100,rl_policy_type="SAC")
+
         # Early stopping
         self.early_stopping = early_stopping
         self.exit = False
-        
+
     def select_action(self, state, evaluate=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if evaluate is False:
@@ -268,15 +247,17 @@ class SAC(object):
         # Sample a batch from memory
         state_batch, action_batch, next_state_batch, reward_batch, mask_batch = memory.sample(batch_size=batch_size)
 
-
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
-        qf1, qf2 = self.critic(state_batch, action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
-        qf1_loss = F.mse_loss(qf1, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
-        qf2_loss = F.mse_loss(qf2, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
+        # Two Q-functions to mitigate positive bias in the policy improvement step
+        qf1, qf2 = self.critic(state_batch, action_batch)
+
+        # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
+        qf1_loss = F.mse_loss(qf1, next_q_value)
+        qf2_loss = F.mse_loss(qf2, next_q_value)
         qf_loss = qf1_loss + qf2_loss
 
         self.critic_optim.zero_grad()
@@ -287,8 +268,8 @@ class SAC(object):
 
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
-
-        policy_loss = ((self.alpha * log_pi) - min_qf_pi).mean() # Jπ = 𝔼st∼D,εt∼N[α * logπ(f(εt;st)|st) − Q(st,f(εt;st))]
+        # Jπ = 𝔼st∼D,εt∼N[α * logπ(f(εt;st)|st) − Q(st,f(εt;st))]
+        policy_loss = ((self.alpha * log_pi) - min_qf_pi).mean()
 
         self.policy_optim.zero_grad()
         policy_loss.backward()
@@ -313,90 +294,107 @@ class SAC(object):
 
         return qf1_loss.item(), qf2_loss.item(), policy_loss.item(), alpha_loss.item(), alpha_tlogs.item()
 
-    def explore_for_expert_targets(self, reward_target_exploration_steps=25_000):  
-        if self.train_env == None:
-            print('Model cannot explore because training envrionment is missing. Please reload model and supply a training envrionment.')  
+    def explore_for_expert_targets(self,
+                                   reward_target_exploration_steps=25_000):
+        if self.train_env is None:
+            print("Model cannot explore because training envrionment is missing. Please reload model and supply a training envrionment.")
             return
-    
+
         self.done = False
-        for t in range(reward_target_exploration_steps): 
-            obs_vec = self.train_env.step(self.policy, random=True, rl_model_type="SAC")
-            
+        for _ in range(reward_target_exploration_steps):
+            obs_vec = self.train_env.step(self.policy,
+                                          random=True,
+                                          rl_model_type="SAC")
+
             for indiv_obs in obs_vec:
-                if indiv_obs[4] == True:
+                if indiv_obs[4] is True:
                     self.done = True
-                
+
             if self.done:
                 self.train_env.reset()
                 self.done = False
                 self.train_env.tracker.reset()
-    
-        self.train_env.reset()
-        self.done = False   
 
-    def learn(self, timesteps, callback, start_timesteps=25_000, incremental_replay_buffer = None):
-        
-        if self.train_env == None:
-            print('Model cannot learn because training envrionment is missing. Please reload model and supply a training envrionment.')
+        self.train_env.reset()
+        self.done = False
+
+    def learn(self,
+              timesteps,
+              callback,
+              start_timesteps=25_000,
+              incremental_replay_buffer = None):
+
+        if self.train_env is None:
+            print("Model cannot learn because training envrionment is missing. Please reload model and supply a training envrionment.")
             return
-        
+
         next_update_at = self.buffer_size*2
 
         episode_reward = 0
         episode_timesteps = 0
         self.episode_num = 0
-      
+
         callback.on_training_start()
 
         self.train_env.reset()
         self.done = False
-        start_time = time.clock_gettime(time.CLOCK_REALTIME) 
+        start_time = time.clock_gettime(time.CLOCK_REALTIME)
 
         episode_start_time = start_time
 
         # Training Loop
         updates = 0
-        
+
         all_actor_losses = []
         all_critic_1_losses = []
         all_critic_2_losses = []
         all_entropy_losses = []
-        
+
         alpha =0
         for t in range(1,int(timesteps)+1):
             self.num_timesteps = t
             episode_timesteps += 1
-            
+
             if t < start_timesteps:
-                obs_vec = self.train_env.step(model=self.policy, random=True, rl_model_type="SAC")
+                obs_vec = self.train_env.step(model=self.policy,
+                                              random=True,
+                                              rl_model_type="SAC")
             else:
-                obs_vec = self.train_env.step(model=self.policy, random=False, rl_model_type="SAC")
-            
+                obs_vec = self.train_env.step(model=self.policy,
+                                              random=False,
+                                              rl_model_type="SAC")
+
             all_rewards = []
             for indiv_obs in obs_vec:
-                if indiv_obs[4] == True:
+                if indiv_obs[4] is True:
                     self.done = True
                 all_rewards.append(indiv_obs[2])
-                transition = (indiv_obs[0], indiv_obs[3], indiv_obs[1], indiv_obs[2], 1. -indiv_obs[4])
+                transition = (indiv_obs[0],
+                              indiv_obs[3],
+                              indiv_obs[1],
+                              indiv_obs[2],
+                              1. -indiv_obs[4])
                 self.replay_buffer.add(*transition)
-         
+
             episode_reward += float(np.mean(np.array(all_rewards)))
-            
+
             if t >= start_timesteps:
                 if len(self.replay_buffer) > self.batch_size:
                     # Number of updates per step in environment
-                    for i in range(self.gradient_steps):
+                    for _ in range(self.gradient_steps):
                         # Update parameters of all the networks
-                        critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = self.train(self.replay_buffer, self.batch_size, updates)
+                        critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = self.train(self.replay_buffer,
+                                                                                                self.batch_size,
+                                                                                                updates)
                         updates += 1
-                        
+
                         all_actor_losses.append(policy_loss)
                         all_critic_1_losses.append(critic_1_loss)
                         all_critic_2_losses.append(critic_2_loss)
                         all_entropy_losses.append(ent_loss)
-            
+
             if self.done:
-                episode_finish_time = time.clock_gettime(time.CLOCK_REALTIME)  
+                episode_finish_time = time.clock_gettime(time.CLOCK_REALTIME)
                 if t < start_timesteps or len(self.replay_buffer) <= self.batch_size:
                     self.trackr.append(actor_loss=0,
                            critic_loss=0,
@@ -404,7 +402,7 @@ class SAC(object):
                            episode_length = episode_timesteps,
                            episode_fps = episode_timesteps / (episode_finish_time - episode_start_time),
                            critic_1_loss=0,
-                           critic_2_loss=0,                           
+                           critic_2_loss=0,
                            entropy_loss=0,
                            entropy=0)
                 else:
@@ -414,7 +412,7 @@ class SAC(object):
                            episode_length = episode_timesteps,
                            episode_fps = episode_timesteps / (episode_finish_time - episode_start_time),
                            critic_1_loss=np.mean(all_critic_1_losses),
-                           critic_2_loss=np.mean(all_critic_2_losses),                           
+                           critic_2_loss=np.mean(all_critic_2_losses),
                            entropy_loss=np.mean(all_entropy_losses),
                            entropy=alpha)
 
@@ -426,19 +424,18 @@ class SAC(object):
                 episode_timesteps = 0
                 self.episode_num += 1
                 self.train_env.tracker.reset()
-                episode_start_time = time.clock_gettime(time.CLOCK_REALTIME)  
-                
+                episode_start_time = time.clock_gettime(time.CLOCK_REALTIME)
+
                 all_actor_losses = []
                 all_critic_1_losses = []
                 all_critic_2_losses = []
                 all_entropy_losses = []
 
-			# Early stopping                            
-            if self.exit == True:
-                print(f'Early stopping mechanism triggered at timestep={self.num_timesteps} after {self.early_stopping} steps without improvement ... Learning terminated.')
+			# Early stopping
+            if self.exit is True:
+                print(f"Early stopping mechanism triggered at timestep={self.num_timesteps} after {self.early_stopping} steps without improvement ... Learning terminated.")
                 break
-                
-   
+
             if incremental_replay_buffer is not None:
                 if t >= next_update_at:
                     if incremental_replay_buffer == "double":
@@ -446,36 +443,36 @@ class SAC(object):
                         next_update_at += self.buffer_size * 2
                     elif incremental_replay_buffer == "triple":
                         self.buffer_size *= 3
-                        next_update_at += self.buffer_size# * 3
+                        next_update_at += self.buffer_size
                     elif incremental_replay_buffer == "quadruple":
                         self.buffer_size *= 4
-                        next_update_at += self.buffer_size# * 3                        
-                    
+                        next_update_at += self.buffer_size
+
                     old_replay_buffer = self.replay_buffer
-                    #replay_buffer = utils.ReplayMemory(replay_buffer_size, torch.device('cuda'))
-                    self.replay_buffer = ReplayMemory(self.buffer_size, device=self.device)
+                    self.replay_buffer = ReplayMemory(self.buffer_size,
+                                                      device=self.device)
                     self.replay_buffer.add_content_of(old_replay_buffer)
-                    
-                    print(f'Updated replay buffer at timestep {t}; replay_buffer_size={self.buffer_size}, len={self.replay_buffer.__len__()} next_update_at={next_update_at}')
-		
-        callback.on_training_end()             
-            
-       
-        
+
+                    print(f"Updated replay buffer at timestep {t}; replay_buffer_size={self.buffer_size}, len={self.replay_buffer.__len__()} next_update_at={next_update_at}")
+
+        callback.on_training_end()
+
     # Save model parameters
     def save(self, filename):
-        torch.save({'policy_state_dict': self.policy.state_dict(),
-                    'critic_state_dict': self.critic.state_dict(),
-                    'critic_target_state_dict': self.critic_target.state_dict(),
-                    'critic_optimizer_state_dict': self.critic_optim.state_dict(),
-                    'policy_optimizer_state_dict': self.policy_optim.state_dict()}, filename)
+        torch.save({"policy_state_dict": self.policy.state_dict(),
+                    "critic_state_dict": self.critic.state_dict(),
+                    "critic_target_state_dict": self.critic_target.state_dict(),
+                    "critic_optimizer_state_dict": self.critic_optim.state_dict(),
+                    "policy_optimizer_state_dict": self.policy_optim.state_dict()}, filename)
 
     # Load model parameters
     def load(self, filename):
         checkpoint = torch.load(filename)
-        self.policy.load_state_dict(checkpoint['policy_state_dict'])
-        self.critic.load_state_dict(checkpoint['critic_state_dict'])
-        self.critic_target.load_state_dict(checkpoint['critic_target_state_dict'])
-        self.critic_optim.load_state_dict(checkpoint['critic_optimizer_state_dict'])
-        self.policy_optim.load_state_dict(checkpoint['policy_optimizer_state_dict'])
-
+        self.policy.load_state_dict(checkpoint["policy_state_dict"])
+        self.critic.load_state_dict(checkpoint["critic_state_dict"])
+        self.critic_target.load_state_dict(
+            checkpoint["critic_target_state_dict"])
+        self.critic_optim.load_state_dict(
+            checkpoint["critic_optimizer_state_dict"])
+        self.policy_optim.load_state_dict(
+            checkpoint["policy_optimizer_state_dict"])

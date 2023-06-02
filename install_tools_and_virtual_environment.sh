@@ -12,8 +12,9 @@ update_utility_binaries() {
 
 	#GIT=https://www.github.com/
 	#GIT_USER=lukevassallo
-	GIT=git@gitlab.lukevassallo.com:
-	GIT_USER=luke
+	#GIT=git@gitlab.lukevassallo.com:
+	GIT=https://gitlab.lukevassallo.com/
+    GIT_USER=luke
 
 	CLEAN_ONLY=false
 	CLEAN_BEFORE_BUILD=false

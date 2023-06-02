@@ -1,77 +1,52 @@
-import math
 import torch
 import numpy as np
-
-def create_log_gaussian(mean, log_std, t):
-    quadratic = -((0.5 * (t - mean) / (log_std.exp())).pow(2))
-    l = mean.shape
-    log_z = log_std
-    z = l[-1] * math.log(2 * math.pi)
-    log_p = quadratic.sum(dim=-1) - log_z.sum(dim=-1) - 0.5 * z
-    return log_p
-
-def logsumexp(inputs, dim=None, keepdim=False):
-    if dim is None:
-        inputs = inputs.view(-1)
-        dim = 0
-    s, _ = torch.max(inputs, dim=dim, keepdim=True)
-    outputs = s + (inputs - s).exp().sum(dim=dim, keepdim=True).log()
-    if not keepdim:
-        outputs = outputs.squeeze(dim)
-    return outputs
+from collections import namedtuple
+import random
 
 def soft_update(target, source, tau):
     for target_param, param in zip(target.parameters(), source.parameters()):
-        target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
+        target_param.data.copy_(
+            target_param.data * (1.0 - tau) + param.data * tau
+            )
 
 def hard_update(target, source):
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(param.data)
 
-class ReplayBuffer(object):
-	def __init__(self, state_dim, action_dim, max_size=int(1e6)):
-		self.max_size = max_size
-		self.ptr = 0
-		self.size = 0
-
-		self.state = np.zeros((max_size, state_dim))
-		self.action = np.zeros((max_size, action_dim))
-		self.next_state = np.zeros((max_size, state_dim))
-		self.reward = np.zeros((max_size, 1))
-		self.not_done = np.zeros((max_size, 1))
-
-		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-	def add(self, state, action, next_state, reward, done):
-		self.state[self.ptr] = state
-		self.action[self.ptr] = action
-		self.next_state[self.ptr] = next_state
-		self.reward[self.ptr] = reward
-		self.not_done[self.ptr] = 1. - done
-
-		self.ptr = (self.ptr + 1) % self.max_size
-		self.size = min(self.size + 1, self.max_size)
-
-
-	def sample(self, batch_size):
-		ind = np.random.randint(0, self.size, size=batch_size)
-
-		return (
-			torch.FloatTensor(self.state[ind]).to(self.device),
-			torch.FloatTensor(self.action[ind]).to(self.device),
-			torch.FloatTensor(self.next_state[ind]).to(self.device),
-			torch.FloatTensor(self.reward[ind]).to(self.device),
-			torch.FloatTensor(self.not_done[ind]).to(self.device)
-		)
-
-from collections import namedtuple
-import random 
 Transition = namedtuple(
     'Transition', ('state', 'action', 'next_state', 'reward', 'done'))
 
-
 class ReplayMemory(object):
+    """
+    A replay memory buffer used in reinforcement learning algorithms to store\
+          and sample transitions.
+
+    Args:
+        capacity (int): The maximum capacity of the replay memory.
+        device (str): The device to store the tensors (e.g., 'cpu', 'cuda').
+
+    Attributes:
+        capacity (int): The maximum capacity of the replay memory.
+        device (str): The device to store the tensors.
+        memory (list): A list to store the transitions.
+        position (int): The current position in the memory buffer.
+
+    Methods:
+        add(*args): Saves a transition to the replay memory.
+        add_content_of(other): Adds the content of another replay buffer to\
+              this replay buffer.
+        get_latest(latest): Returns the latest elements from the replay memory.
+        add_latest_from(other, latest): Adds the latest samples from another\
+             buffer to this buffer.
+        shuffle(): Shuffles the transitions in the replay memory.
+        sample(batch_size): Samples a batch of transitions from the replay\
+              memory.
+        sample_from_latest(batch_size, latest): Samples a batch of transitions\
+              from the latest elements.
+        __len__(): Returns the number of transitions stored in the replay\
+              memory.
+        reset(): Resets the replay memory by clearing all stored transitions.
+    """
 
     def __init__(self, capacity, device):
         self.device = device
@@ -93,8 +68,10 @@ class ReplayMemory(object):
 
     def add_content_of(self, other):
         """
-        Adds the content of another replay buffer to this replay buffer
-        :param other: another replay buffer
+        Adds the content of another replay buffer to this replay buffer.
+
+        Args:
+            other (ReplayMemory): Another replay buffer.
         """
         latest_trans = other.get_latest(self.capacity)
         for transition in latest_trans:
@@ -102,10 +79,13 @@ class ReplayMemory(object):
 
     def get_latest(self, latest):
         """
-        Returns the latest element from the other buffer with the most recent ones at the end of the returned list
-        :param other: another replay buffer
-        :param latest: the number of latest elements to return
-        :return: a list with the latest elements
+        Returns the latest elements from the replay memory.
+
+        Args:
+            latest (int): The number of latest elements to return.
+
+        Returns:
+            list: A list containing the latest elements.
         """
         if self.capacity < latest:
             latest_trans = self.memory[self.position:].copy() + self.memory[:self.position].copy()
@@ -119,18 +99,31 @@ class ReplayMemory(object):
 
     def add_latest_from(self, other, latest):
         """
-        Adds the latest samples from the other buffer to this buffer
-        :param other: another replay buffer
-        :param latest: the number of elements to add
+        Adds the latest samples from another buffer to this buffer.
+
+        Args:
+            other (ReplayMemory): Another replay buffer.
+            latest (int): The number of elements to add.
         """
         latest_trans = other.get_latest(latest)
         for transition in latest_trans:
             self.add(*transition)
 
     def shuffle(self):
+        """Shuffles the transitions in the replay memory."""
         random.shuffle(self.memory)
 
     def sample(self, batch_size):
+        """
+        Samples a batch of transitions from the replay memory.
+
+        Args:
+            batch_size (int): The size of the batch to sample.
+
+        Returns:
+            tuple: A tuple containing the sampled tensors\
+                  (state, action, next_state, reward, done).
+        """
         transitions = random.sample(self.memory, batch_size)
         batch = Transition(*zip(*transitions))
 
@@ -142,6 +135,18 @@ class ReplayMemory(object):
         return state, action, next_state, reward, done
 
     def sample_from_latest(self, batch_size, latest):
+        """
+        Samples a batch of transitions from the latest elements in the\
+              replay memory.
+
+        Args:
+            batch_size (int): The size of the batch to sample.
+            latest (int): The number of latest elements to consider.
+
+        Returns:
+            tuple: A tuple containing the sampled tensors\
+                  (state, action, next_state, reward, done).
+        """
         latest_trans = self.get_latest(latest)
         transitions = random.sample(latest_trans, batch_size)
         batch = Transition(*zip(*transitions))
@@ -158,4 +163,4 @@ class ReplayMemory(object):
 
     def reset(self):
         self.memory = []
-        self.position = 0    
+        self.position = 0
