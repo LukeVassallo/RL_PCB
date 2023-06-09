@@ -184,6 +184,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+#TODO: Check for existance of python3.8 
+
 source setup.sh
 
 if [ "$UPDATE_UTILITY_BINARIES" == true ]; then

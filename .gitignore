@@ -5,3 +5,4 @@ report_config.json
 scheduler.log
 tmp
 experiments/*/experiment_report.pdf
+venv
