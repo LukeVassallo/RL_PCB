@@ -184,7 +184,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-#TODO: Check for existance of python3.8 
+# Check if python3.8 exists
+if command -v python3.8 &>/dev/null; then
+    echo "Python 3.8 is installed."
+else
+    echo "Python 3.8 is not installed. Please install python3.8 and relaunch the script."
+fi
 
 source setup.sh
 
@@ -196,10 +201,6 @@ if [ ! -d "bin" ]; then
 	echo "Installing kicad PCB parsing utility and PCB place and route tools."
 	update_utility_binaries --run_placer_tests --run_router_tests
 fi
-
-#if [ -d "venv" ]; then
-#	echo "Virtual environment already exists ... Program terminating."
-#fi
 
 if [ ! -d "venv" ]; then
 	echo "Creating virtual environment ..."
