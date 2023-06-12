@@ -2,7 +2,6 @@
 
 CPU_ONLY=false
 UPDATE_UTILITY_BINARIES=false
-ENV_ONLY=false
 
 update_utility_binaries() {
 	date="2023/05/06"
@@ -108,65 +107,80 @@ update_utility_binaries() {
 
     echo -n "Building kicad pcb parsing utility. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/kicadParser
-    if [ -d "KicadParser" ]; then
-        echo "Found, cleaning"
-        cd KicadParser
-        make clean
-            git pull $ORIGIN ${kicadParser_branch}
-        #git submodule update --remote --recursive
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    if [[ $response -eq 200 ]]; then        echo "Repository exists."
+        if [ -d "KicadParser" ]; then
+            echo "Found, cleaning"
+            cd KicadParser
+            make clean
+                git pull $ORIGIN ${kicadParser_branch}
+            #git submodule update --remote --recursive
+        else
+            echo "Not found, cloning."
+            git clone --branch ${kicadParser_branch} ${ORIGIN} --recurse-submodules KicadParser
+            cd KicadParser
+        fi
+        make -j$(nproc)
+        cp -v build/kicadParser_test ../kicadParser
+        cd ..
     else
-        echo "Not found, cloning."
-        git clone --branch ${kicadParser_branch} ${ORIGIN} --recurse-submodules KicadParser
-        cd KicadParser
+        echo "Repository does not exist."
     fi
-    make -j$(nproc)
-    cp -v build/kicadParser_test ../kicadParser
-    cd ..
 
     echo -n "Building simulated annealing pcb placer. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/SA_PCB
-    if [ -d "SA_PCB" ]; then
-        echo "Found, cleaning"
-        cd SA_PCB
-        make clean
-        git pull ${ORIGIN} ${SA_PCB_branch}
-        #git submodule update --remote --recursive
-    else
-        echo "Not found, cloning."
-        git clone --branch ${SA_PCB_branch} ${ORIGIN} --recurse-submodules
-        cd SA_PCB
-    fi
-    make -j$(nproc)
-    if [ "$RUN_PLACER_TESTS" = true ]; then
-        make test_place_excl_power
-        make test_place_incl_power
-    fi
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    if [[ $response -eq 200 ]]; then        echo "Repository exists."    
+        if [ -d "SA_PCB" ]; then
+            echo "Found, cleaning"
+            cd SA_PCB
+            make clean
+            git pull ${ORIGIN} ${SA_PCB_branch}
+            #git submodule update --remote --recursive
+        else
+            echo "Not found, cloning."
+            git clone --branch ${SA_PCB_branch} ${ORIGIN} --recurse-submodules
+            cd SA_PCB
+        fi
+        make -j$(nproc)
+        if [ "$RUN_PLACER_TESTS" = true ]; then
+            make test_place_excl_power
+            make test_place_incl_power
+        fi
 
-    #cp -v ./build/sa_placer_test ../bin/sa_placer
-    cp -v ./build/sa_placer_test ../sa
-    cd ..
+        #cp -v ./build/sa_placer_test ../bin/sa_placer
+        cp -v ./build/sa_placer_test ../sa
+        cd ..
+    else
+        echo "Repository does not exist."
+    fi        
 
     echo -n "Building pcbRouter binary. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/pcbRouter
-    if [ -d "pcbRouter" ]; then
-        echo "Found, cleaning"
-        cd pcbRouter
-        make clean
-            git pull ${ORIGIN} ${pcbRouter_branch}
-        #git submodule update --remote --recursive
-    else
-        echo "Not found, cloning."
-        git clone --branch ${pcbRouter_branch} ${ORIGIN} --recurse-submodules
-        cd pcbRouter
-    fi
-    make -j$(nproc)
-    if [ "$RUN_ROUTER_TESTS" = true ]; then
-        make test_route_excl_power
-        make test_route_incl_power
-    fi
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    if [[ $response -eq 200 ]]; then        echo "Repository exists."    
+        if [ -d "pcbRouter" ]; then
+            echo "Found, cleaning"
+            cd pcbRouter
+            make clean
+                git pull ${ORIGIN} ${pcbRouter_branch}
+            #git submodule update --remote --recursive
+        else
+            echo "Not found, cloning."
+            git clone --branch ${pcbRouter_branch} ${ORIGIN} --recurse-submodules
+            cd pcbRouter
+        fi
+        make -j$(nproc)
+        if [ "$RUN_ROUTER_TESTS" = true ]; then
+            make test_route_excl_power
+            make test_route_incl_power
+        fi
 
-    cp -v build/pcbRouter_test ../pcb_router
-    cd ..
+        cp -v build/pcbRouter_test ../pcb_router
+        cd ..
+    else
+        echo "Repository does not exist."
+    fi    
 
     cd ..
 }
@@ -176,10 +190,6 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --cpu_only)
             CPU_ONLY=true
-            shift
-            ;;
-        --env_only)
-            ENV_ONLY=true
             shift
             ;;
         --update_utility_binaries)
@@ -202,11 +212,9 @@ if [ "$UPDATE_UTILITY_BINARIES" == true ]; then
 	update_utility_binaries --clean_before_build --run_placer_tests --run_router_tests
 fi
 
-if [ "$ENV_ONLY" == false ]; then
-    if [ ! -d "bin" ]; then
-        echo "Installing kicad PCB parsing utility and PCB place and route tools."
-        update_utility_binaries --run_placer_tests --run_router_tests
-    fi
+if [ ! -d "bin" ]; then
+    echo "Installing kicad PCB parsing utility and PCB place and route tools."
+    update_utility_binaries --run_placer_tests --run_router_tests
 fi
 
 if [ ! -d "venv" ]; then
