@@ -17,7 +17,7 @@ sleep 2
 
 cd ${RL_PCB}/src/training
 
-#./scheduler.sh --run_config ${EXP_DIR}/run_config.txt --logfile $EXP_DIR/scheduler.log --instances 4 --yes 
+./scheduler.sh --run_config ${EXP_DIR}/run_config.txt --logfile $EXP_DIR/scheduler.log --instances 4 --yes 
 
 cd ${EXP_DIR}
 
@@ -25,7 +25,7 @@ cd ${EXP_DIR}
 python report_config.py 
 
 cd ${RL_PCB}/src/report_generation
-#python generate_experiment_report.py --dir ${EXP_DIR}/work --hyperparameters ${EXP_DIR}/hyperparameters/hp_td3.json,${EXP_DIR}/hyperparameters/hp_sac.json --report_config ${EXP_DIR}/report_config.json --output ${EXP_DIR}/experiment_report.pdf -y --tmp_dir ${EXP_DIR}/tmp
+python generate_experiment_report.py --dir ${EXP_DIR}/work --hyperparameters ${EXP_DIR}/hyperparameters/hp_td3.json,${EXP_DIR}/hyperparameters/hp_sac.json --report_config ${EXP_DIR}/report_config.json --output ${EXP_DIR}/experiment_report.pdf -y --tmp_dir ${EXP_DIR}/tmp
 cd ${EXP_DIR}
 
 # Check if all place and route binaries exist

@@ -39,12 +39,12 @@ The automated installation procedure makes the following changes to the local re
 - Installs the wheel libraries in the lib folder
 
 ```
-./install_tools_and_virtual_environment.sh
+./install_tools_and_virtual_environment.sh --env_only
 ```
 
 If you do not have CUDA 11.7 installed, you can install the CPU only. Tests an experiments will run significantly slower but works out of the box.
 ```
-./install_tools_and_virtual_environment.sh --cpu_only
+./install_tools_and_virtual_environment.sh --env_only --cpu_only
 ```
 
 If you require a different version of CUDA, please make the following changes and run `install_tools_and_virtual_environment.sh` without any options:
