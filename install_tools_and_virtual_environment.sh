@@ -2,6 +2,7 @@
 
 CPU_ONLY=false
 UPDATE_UTILITY_BINARIES=false
+ENV_ONLY=false
 
 update_utility_binaries() {
 	date="2023/05/06"
@@ -177,6 +178,10 @@ while [[ $# -gt 0 ]]; do
             CPU_ONLY=true
             shift
             ;;
+        --env_only)
+            ENV_ONLY=true
+            shift
+            ;;
         --update_utility_binaries)
             UPDATE_UTILITY_BINARIES=true
             shift
@@ -197,9 +202,11 @@ if [ "$UPDATE_UTILITY_BINARIES" == true ]; then
 	update_utility_binaries --clean_before_build --run_placer_tests --run_router_tests
 fi
 
-if [ ! -d "bin" ]; then
-	echo "Installing kicad PCB parsing utility and PCB place and route tools."
-	update_utility_binaries --run_placer_tests --run_router_tests
+if [ "$ENV_ONLY" == false ]; then
+    if [ ! -d "bin" ]; then
+        echo "Installing kicad PCB parsing utility and PCB place and route tools."
+        update_utility_binaries --run_placer_tests --run_router_tests
+    fi
 fi
 
 if [ ! -d "venv" ]; then

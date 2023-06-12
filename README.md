@@ -21,7 +21,8 @@ The main contribution of this work is:
 ## Install Pre-requisites
 The following packages must be installed on the system to compile libraries for parsing KiCAD PCB files (.kicad_pcb) and place-and-route tools.
 ```
-sudo apt install build-essential libboost-dev libboost-filesystem-dev
+sudo apt install python3-virtualenv build-essential libboost-dev libboost-filesystem-dev
+
 ```
 
 To ensure consistency, Python code requires the use of version 3.8. Moreover, virtual environments for Python are necessary to install dependencies within a limited scope, preventing any modifications to the system's configuration. If Python3.8 is not available by default through the package manager of your system, you can use the following code to add an apt repository that maintains previous versions and source the required version accordingly.
@@ -92,7 +93,7 @@ This section provides an optional setup procedure to remove the Nvidia GPU drive
 3. Remove cuddnn `sudo apt remove libcudnn* libcudnn*-dev`
 
 ### Install Nvidia GPU Driver
-To install the driver, you can start by issuing the command `ubuntu-drivers` devices and identifying the latest third-party non-free version. Once you have identified the appropriate version, use `apt` to install the driver. After installing the driver, reboot your system and issue the command `nvidia-smi` to identify the full driver version. In the upcoming section, you will need this information to determine which CUDA version is supported.
+To install the driver, you can start by issuing the command `ubuntu-drivers devices` and identifying the latest third-party non-free version. Once you have identified the appropriate version, use `apt` to install the driver. After installing the driver, reboot your system and issue the command `nvidia-smi` to identify the full driver version. In the upcoming section, you will need this information to determine which CUDA version is supported.
 
 ### Download and install CUDA toolkit
 To ensure that your device driver is compatible with CUDA, you'll need to check the compatibility using the following link: https://docs.nvidia.com/deploy/cuda-compatibility/. Once you've confirmed the compatibility, you can proceed to the CUDA Toolkit Archive at https://developer.nvidia.com/cuda-toolkit-archive. From there, select version 11.7 and choose the appropriate platform parameters from the "Select Target Platform" section. Next, download the runfile (local) and proceed with the installation process. Finally, follow the installation instructions carefully and avoid installing the driver when prompted.
