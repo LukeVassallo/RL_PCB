@@ -232,6 +232,7 @@ python -V
 python -m pip install --upgrade pip
 python -m pip install --upgrade setuptools==65.5.0	# See: https://github.com/openai/gym/issues/3176
 
+python -m pip install -r requirements.txt
 # Refer to pytorch and update according to your cuda version
 if [ "$CPU_ONLY" == true ]; then
 	python -m pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
@@ -239,9 +240,9 @@ else
 	python -m pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
 fi
 
-python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna tensorboard reportlab==3.6.13 py-cpuinfo psutil pandas seaborn pynvml plotly moviepy
+#python -m pip install matplotlib numpy==1.23.3 opencv-python gym pyglet optuna tensorboard reportlab==3.6.13 py-cpuinfo psutil pandas seaborn pynvml plotly moviepy
 
-python -m pip install -U kaleido
+#python -m pip install -U kaleido
 
 python -m pip install ${RL_PCB}/lib/pcb_netlist_graph-0.0.1-py3-none-any.whl
 python -m pip install ${RL_PCB}/lib/pcb_file_io-0.0.1-py3-none-any.whl
