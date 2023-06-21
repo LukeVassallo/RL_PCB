@@ -503,7 +503,7 @@ class log_and_eval_callback():
                 fileName=os.path.join(run_output_dir, f"{i}.mp4"),
                 display_metrics=False)
             vids = eval_env.tracker.video_tensor()
-            # self.log_video(vids=vids, tag=video_tag, global_step=i)
+            self.log_video(vids=vids, tag=video_tag, global_step=i)
 
             # eval_env.tracker.create_plot(fileName=os.path.join(video_path,
             #                                                    f'{i}.png'))

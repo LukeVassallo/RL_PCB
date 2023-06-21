@@ -224,8 +224,7 @@ def create_image(all_comp_grids, ratsnest, fileName=None, draw_debug=False):
 def get_video_tensor(all_comp_grids, ratsnest):
     width = all_comp_grids[0][0].shape[0]
     height = all_comp_grids[0][0].shape[1]
-    channels = 1
-
+    channels = 3
     frame_buf = []
     frames = len(all_comp_grids)
 
@@ -241,8 +240,8 @@ def get_video_tensor(all_comp_grids, ratsnest):
                     (128, 128, 0),
                     2)
 
+        frame = np.tile(frame, (channels,1,1))
         np.reshape(frame, (channels, height, width))
-
         frame_buf.append(frame)
 
     video_tensor = torch.tensor(np.array(frame_buf))
