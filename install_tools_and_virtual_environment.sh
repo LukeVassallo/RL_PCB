@@ -2,6 +2,7 @@
 
 CPU_ONLY=false
 UPDATE_UTILITY_BINARIES=false
+SKIP_REPOSITORY_CHECK=false
 
 update_utility_binaries() {
 	date="2023/05/06"
@@ -108,7 +109,8 @@ update_utility_binaries() {
     echo -n "Building kicad pcb parsing utility. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/kicadParser
     response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
-    if [[ $response -eq 200 ]]; then        echo "Repository exists."
+    if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then        
+        echo "Repository exists."
         if [ -d "KicadParser" ]; then
             echo "Found, cleaning"
             cd KicadParser
@@ -130,7 +132,8 @@ update_utility_binaries() {
     echo -n "Building simulated annealing pcb placer. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/SA_PCB
     response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
-    if [[ $response -eq 200 ]]; then        echo "Repository exists."    
+    if [[ $response -eq 200 ]]; then        
+        echo "Repository exists."    
         if [ -d "SA_PCB" ]; then
             echo "Found, cleaning"
             cd SA_PCB
@@ -158,7 +161,8 @@ update_utility_binaries() {
     echo -n "Building pcbRouter binary. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/pcbRouter
     response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
-    if [[ $response -eq 200 ]]; then        echo "Repository exists."    
+    if [[ $response -eq 200 ]]; then        
+        echo "Repository exists."    
         if [ -d "pcbRouter" ]; then
             echo "Found, cleaning"
             cd pcbRouter
@@ -196,6 +200,10 @@ while [[ $# -gt 0 ]]; do
             UPDATE_UTILITY_BINARIES=true
             shift
             ;;
+        --skip-repository-check)
+            SKIP_REPOSITORY_CHECK=true
+            shift
+            ;;            
     esac
 done
 
