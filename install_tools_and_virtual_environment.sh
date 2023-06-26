@@ -132,7 +132,7 @@ update_utility_binaries() {
     echo -n "Building simulated annealing pcb placer. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/SA_PCB
     response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
-    if [[ $response -eq 200 ]]; then        
+    if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then       
         echo "Repository exists."    
         if [ -d "SA_PCB" ]; then
             echo "Found, cleaning"
@@ -161,7 +161,7 @@ update_utility_binaries() {
     echo -n "Building pcbRouter binary. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/pcbRouter
     response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
-    if [[ $response -eq 200 ]]; then        
+    if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then        
         echo "Repository exists."    
         if [ -d "pcbRouter" ]; then
             echo "Found, cleaning"
