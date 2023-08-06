@@ -3,6 +3,7 @@
 CPU_ONLY=false
 UPDATE_UTILITY_BINARIES=false
 SKIP_REPOSITORY_CHECK=false
+	date="2023/08/06"
 
 update_utility_binaries() {
 	date="2023/05/06"
@@ -30,11 +31,11 @@ update_utility_binaries() {
 	sleep 1
 
 	print_help() {
-		echo "--clean_only              removes the git repositories and exits."
-		echo "--clean_before_build      removes the git repositories then clones and builds binaries."
-		echo "--run_placer_tests	    runs automated tests to verify placer."
-		echo "--run_router_tests        runs automated tests to verify router."
-		echo "--help                    print this help and exit."
+		echo "  --clean_only                removes the git repositories and exits."
+		echo "  --clean_before_build        removes the git repositories then clones and builds binaries."
+		echo "  --run_placer_tests          runs automated tests to verify placer."
+		echo "  --run_router_tests          runs automated tests to verify router."
+		echo "  --help                      print this help and exit."
 	}
 
     while [[ $# -gt 0 ]]; do
@@ -43,19 +44,19 @@ update_utility_binaries() {
                 CLEAN_ONLY=true
                 shift   # past argument
                 ;;
-        --clean_before_build)
-            CLEAN_BEFORE_BUILD=true
-            shift
-            ;;
-        --run_placer_tests)
-            RUN_PLACER_TESTS=true
-            shift
-            ;;
-        --run_router_tests)
-            RUN_ROUTER_TESTS=true
-            shift
-            ;;
-            --help)
+            --clean_before_build)
+                CLEAN_BEFORE_BUILD=true
+                shift
+                ;;
+            --run_placer_tests)
+                RUN_PLACER_TESTS=true
+                shift
+                ;;
+            --run_router_tests)
+                RUN_ROUTER_TESTS=true
+                shift
+                ;;
+            -h|--help)
                 print_help
                 exit 0
                 ;;
@@ -108,7 +109,7 @@ update_utility_binaries() {
 
     echo -n "Building kicad pcb parsing utility. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/kicadParser
-    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$ORIGIN")
     if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then        
         echo "Repository exists."
         if [ -d "KicadParser" ]; then
@@ -131,7 +132,7 @@ update_utility_binaries() {
 
     echo -n "Building simulated annealing pcb placer. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/SA_PCB
-    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$ORIGIN")
     if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then       
         echo "Repository exists."    
         if [ -d "SA_PCB" ]; then
@@ -160,7 +161,7 @@ update_utility_binaries() {
 
     echo -n "Building pcbRouter binary. Checking for repository ... "
     ORIGIN=${GIT}${GIT_USER}/pcbRouter
-    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$repository_url")
+    response=$(curl -sL -I -o /dev/null -w "%{http_code}" "$ORIGIN")
     if [[ $response -eq 200 ]] || [ "$SKIP_REPOSITORY_CHECK" = true ]; then        
         echo "Repository exists."    
         if [ -d "pcbRouter" ]; then
@@ -189,7 +190,22 @@ update_utility_binaries() {
     cd ..
 }
 
+    printf "\n"
+	printf "  **** Luke Vassallo M.Sc - install_tools_and_virtual_environment.sh\n"
+	printf "   *** Program to setup the environemnt for RL_PCB and baseline place and route tools.\n"
+    printf "\033[32m"       # Green text color
+    printf "       RL_PCB is an end-to-end Reinforcement Learning PCB placement methodology.\n"
+    printf "\033[0m"        # Black text color
+	printf "    ** Last modification time %s\n" $date
+	printf "\n"
+	sleep 5
 
+print_help() {
+    echo "  --cpu_only                  installs the cpu only version of pyTorch."
+    echo "  --update_utility_binaries   cleans the git repositories then clones, builds and tests the place and route binaries."
+    echo "  --skip-repository-check     skips existance checks when cloning dependent repositories for place and route tools."
+    echo "  --help                      print this help and exit."
+}
 while [[ $# -gt 0 ]]; do
     case $1 in
         --cpu_only)
@@ -203,7 +219,12 @@ while [[ $# -gt 0 ]]; do
         --skip-repository-check)
             SKIP_REPOSITORY_CHECK=true
             shift
-            ;;            
+            ;;
+        -h|--help)
+            print_help
+            update_utility_binaries --help
+            exit 0
+            ;;
     esac
 done
 
@@ -218,6 +239,7 @@ source setup.sh
 
 if [ "$UPDATE_UTILITY_BINARIES" == true ]; then
 	update_utility_binaries --clean_before_build --run_placer_tests --run_router_tests
+    exit 0
 fi
 
 if [ ! -d "bin" ]; then
