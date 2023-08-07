@@ -168,8 +168,5 @@ def main():
     print(f"mean best_mean_step = {np.mean(mean_best_mean_steps)}")
 
 if __name__ == "__main__":
-    try:
-        main()
-        sys.exit(0) # success
-    except:
-        sys.exit(-1) # fail
+    main()
+
