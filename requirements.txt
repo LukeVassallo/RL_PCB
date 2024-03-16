@@ -58,9 +58,6 @@ SQLAlchemy==2.0.16
 tenacity==8.2.2
 tensorboard==2.13.0
 tensorboard-data-server==0.7.1
-torch==1.13.1+cu117
-torchaudio==0.13.1+cu117
-torchvision==0.14.1+cu117
 tqdm==4.65.0
 typing_extensions==4.6.3
 tzdata==2023.3
