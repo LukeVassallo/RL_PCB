@@ -1,6 +1,27 @@
 [toc]
 
-RL\_PCB is a novel learning-based method for optimising the placement of circuit components on a Printed Circuit Board (PCB). It was developed for my Master's Thesis titled *Automated PCB component placement using Reinforcement Learning*, carried out under the supervision of Dr Josef Bajada. Reinforcement learning is used to learn general policies for iteratively improving a circuit placement, leading to intuitive layouts while outperforming stochastic methods in terms of post-routing wirelength.
+# Project Description
+
+RL_PCB is an end-to-end Reinforcement Learning PCB placement methodology. The solution is inspired from cellular automata. The state of the circuit placement problem is distributed across all the components on the layout region. Every component can update it's positioning independently based on local and global information. The question of how to update the state, factoring in experience (i.e. past knowledge) is a particularly difficult one. We use reinforcement learning to learn ways of updating the state. We do so in a way that localised updates are not destructive to the global solution. Consequently the solution naturally comes out as an emergent property of the system.  
+
+You can learn more about this work by reading our [DATE 24 paper](https://ieeexplore.ieee.org/document/10546526). My [Master thesis](https://www.lukevassallo.com/wp-content/uploads/2023/09/automated_pcb_component_placement_using_rl_msc_thesis_v2_1_lv.pdf) investigated "A graph placement methodology for fast chip design" proposed by Mirhoseini et al., and based on it's shortcomings proposed this solution. 
+
+If you find this work useful please cite us!
+```bibtex
+@inproceedings{Vassallo2024,
+  author={Vassallo, Luke and Bajada, Josef},
+  booktitle={2024 Design, Automation & Test in Europe Conference & Exhibition (DATE)}, 
+  title={Learning Circuit Placement Techniques Through Reinforcement Learning with Adaptive Rewards}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1-6},
+}
+```
+
+RL\_PCB is a novel learning-based method for optimising the placement of circuit components on a Printed Circuit Board (PCB). Reinforcement learning is used to learn general policies for iteratively improving a circuit placement, leading to intuitive layouts while outperforming stochastic methods in terms of post-routing wirelength.
+
+# Key Results
 
 The main contribution of this work is:
 1. The policies learn the fundamental rules of the task and demonstrate an understanding of the problem dynamics. The agent is observed taking actions that **in the long term** minimise overlap-free wirelength. At the same time, the components naturally fall in place, resulting in a coherent layout. 
